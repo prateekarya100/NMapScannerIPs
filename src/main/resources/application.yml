@@ -1,0 +1,34 @@
+#spring.application.name=nMapScanner
+
+
+server:
+  port: 9006
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/nmap
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      ddl-auto: update
+    show-sql: true
+
+  security:
+    user:
+      name: tomcatdev
+      password: admin
+
+
+  thymeleaf:
+    prefix: classpath:/templates/materialize-html-admin-template/html-starter/vertical-menu-template/
+#    prefix: classpath:/templates/materialize-html-admin-template/html-starter/vertical-menu-template/
+    suffix: .html
+    mode: HTML
+    cache: false
+    check-template-location: true
+

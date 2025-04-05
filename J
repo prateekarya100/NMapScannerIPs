@@ -1,0 +1,19 @@
+# Nmap 7.95 scan initiated Fri Apr  4 23:01:07 2025 as: nmap -sV -T4 -F -oJ - 192.168.1.1-10
+Failed to resolve "-".
+Bare '-': did you put a space between '--'?
+Nmap scan report for RTK_GW.hgu_lan (192.168.1.1)
+Host is up (0.0095s latency).
+Not shown: 92 closed tcp ports (reset)
+PORT    STATE    SERVICE      VERSION
+21/tcp  filtered ftp
+22/tcp  filtered ssh
+23/tcp  filtered telnet
+53/tcp  open     domain       dnsmasq 2.80
+80/tcp  open     tcpwrapped
+139/tcp filtered netbios-ssn
+443/tcp open     ssl/http     Boa HTTPd 0.93.15
+445/tcp filtered microsoft-ds
+MAC Address: 4C:AE:1C:35:2C:F2 (SaiNXT Technologies LLP)
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Fri Apr  4 23:01:19 2025 -- 10 IP addresses (1 host up) scanned in 12.40 seconds
