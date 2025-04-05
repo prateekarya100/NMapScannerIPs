@@ -25,4 +25,7 @@ public class ScanSession {
 
     @OneToMany(mappedBy = "scanSession", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<ScannedIP> scannedIPs = new ArrayList<>();
+
+    @Lob
+    private String jsonResult;
 }

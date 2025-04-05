@@ -1,5 +1,6 @@
 package com.nmap.nMapScanner.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nmap.nMapScanner.model.NMapScanData;
 import com.nmap.nMapScanner.model.ScanSession;
 import com.nmap.nMapScanner.model.ScannedIP;
@@ -14,6 +15,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class iScannerServiceImpl implements IScannerService{
@@ -109,13 +114,52 @@ public class iScannerServiceImpl implements IScannerService{
         return "nmap " + args + " " + target;
     }
 
+//    private void parseAndSaveOutput(String output, ScanSession session) {
+//        String[] lines = output.split("\n");
+//        ScannedIP currentIP = null;
+//
+//        for (String line : lines) {
+//            line = line.trim();
+//
+//            if (line.startsWith("Nmap scan report for")) {
+//                String ip = line.replace("Nmap scan report for", "").trim();
+//                currentIP = new ScannedIP();
+//                currentIP.setIpAddress(ip);
+//                currentIP.setScanSession(session);
+//                scannedIPRepository.save(currentIP);
+//
+//            } else if (line.matches("^\\d+/\\w+\\s+open.*")) {
+//                if (currentIP != null) {
+//                    String[] parts = line.split("\\s+");
+//                    String[] portInfo = parts[0].split("/");
+//                    int port = Integer.parseInt(portInfo[0]);
+//                    String protocol = portInfo[1];
+//                    String service = parts.length > 2 ? parts[2] : "unknown";
+//
+//                    ScannedPort scannedPort = new ScannedPort();
+//                    scannedPort.setPort(port);
+//                    scannedPort.setProtocol(protocol);
+//                    scannedPort.setService(service);
+//                    scannedPort.setScannedIP(currentIP);
+//
+//                    scannedPortRepository.save(scannedPort);
+//                }
+//            }
+//        }
+//    }
+
+
     private void parseAndSaveOutput(String output, ScanSession session) {
         String[] lines = output.split("\n");
         ScannedIP currentIP = null;
 
+        // To build JSON result
+        Map<String, List<Map<String, String>>> jsonResultMap = new LinkedHashMap<>();
+
         for (String line : lines) {
             line = line.trim();
 
+            // Match IP line
             if (line.startsWith("Nmap scan report for")) {
                 String ip = line.replace("Nmap scan report for", "").trim();
                 currentIP = new ScannedIP();
@@ -123,24 +167,53 @@ public class iScannerServiceImpl implements IScannerService{
                 currentIP.setScanSession(session);
                 scannedIPRepository.save(currentIP);
 
-            } else if (line.matches("^\\d+/\\w+\\s+open.*")) {
+                jsonResultMap.put(ip, new ArrayList<>());
+
+                // Match port line with service and version
+            } else if (line.matches("^\\d+/\\w+\\s+\\w+\\s+.*")) {
                 if (currentIP != null) {
-                    String[] parts = line.split("\\s+");
+                    String[] parts = line.split("\\s+", 5); // Limit to 5 parts for version info
+
+                    // Example: "80/tcp open http Apache httpd 2.4.41"
                     String[] portInfo = parts[0].split("/");
                     int port = Integer.parseInt(portInfo[0]);
                     String protocol = portInfo[1];
-                    String service = parts.length > 2 ? parts[2] : "unknown";
+                    String state = parts[1];
+                    String service = parts[2];
+                    String version = parts.length >= 5 ? parts[4] : (parts.length >= 4 ? parts[3] : "unknown");
 
+                    // Save to DB
                     ScannedPort scannedPort = new ScannedPort();
                     scannedPort.setPort(port);
                     scannedPort.setProtocol(protocol);
+                    scannedPort.setState(state);
                     scannedPort.setService(service);
+                    scannedPort.setVersion(version);
                     scannedPort.setScannedIP(currentIP);
-
                     scannedPortRepository.save(scannedPort);
+
+                    // Add to JSON map
+                    Map<String, String> portMap = new LinkedHashMap<>();
+                    portMap.put("port", String.valueOf(port));
+                    portMap.put("protocol", protocol);
+                    portMap.put("state", state);
+                    portMap.put("service", service);
+                    portMap.put("version", version);
+                    jsonResultMap.get(currentIP.getIpAddress()).add(portMap);
                 }
             }
         }
+
+        // Convert map to JSON and save to session
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonResultMap);
+            session.setJsonResult(jsonString);
+            scanSessionRepository.save(session);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
 
 }

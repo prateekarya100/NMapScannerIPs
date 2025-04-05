@@ -18,6 +18,5 @@ public class NMapScanData {
     private String target;
     private String profile;
 
-    @Lob
-    private String jsonResult;
+
 }

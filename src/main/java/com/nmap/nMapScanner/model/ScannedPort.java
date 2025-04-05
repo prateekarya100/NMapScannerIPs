@@ -19,7 +19,9 @@ public class ScannedPort {
 
     private int port;
     private String protocol;
+    private String state;
     private String service;
+    private String version;
 
     @ManyToOne
     @JoinColumn(name = "scanned_ip_id")
