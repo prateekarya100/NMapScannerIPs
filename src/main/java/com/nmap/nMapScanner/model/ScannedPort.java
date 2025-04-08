@@ -27,4 +27,8 @@ public class ScannedPort {
     @JoinColumn(name = "scanned_ip_id")
     private ScannedIP scannedIP;
 
+    @ManyToOne
+    @JoinColumn(name = "scan_session_id")
+    private ScanSession scanSession;
+
 }

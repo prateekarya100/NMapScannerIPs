@@ -162,10 +162,12 @@ public class iScannerServiceImpl implements IScannerService{
             // Match IP line
             if (line.startsWith("Nmap scan report for")) {
                 String ip = line.replace("Nmap scan report for", "").trim();
-                currentIP = new ScannedIP();
-                currentIP.setIpAddress(ip);
-                currentIP.setScanSession(session);
-                scannedIPRepository.save(currentIP);
+               currentIP = scannedIPRepository.findByIpAddress(ip)
+        .orElseGet(() -> {
+            ScannedIP newIp = new ScannedIP();
+            newIp.setIpAddress(ip);
+            return scannedIPRepository.save(newIp);
+        });
 
                 jsonResultMap.put(ip, new ArrayList<>());
 
@@ -190,7 +192,9 @@ public class iScannerServiceImpl implements IScannerService{
                     scannedPort.setService(service);
                     scannedPort.setVersion(version);
                     scannedPort.setScannedIP(currentIP);
+                    scannedPort.setScanSession(session); // ✅ FIXED
                     scannedPortRepository.save(scannedPort);
+
 
                     // Add to JSON map
                     Map<String, String> portMap = new LinkedHashMap<>();

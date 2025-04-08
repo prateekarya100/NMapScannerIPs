@@ -23,9 +23,9 @@ public class ScannedIP {
 
     private String ipAddress;
 
-    @ManyToOne
-    @JoinColumn(name = "scan_session_id")
-    private ScanSession scanSession;
+//    @ManyToOne
+//    @JoinColumn(name = "scan_session_id")
+//    private ScanSession scanSession;
 
     @OneToMany(mappedBy = "scannedIP", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<ScannedPort> ports = new ArrayList<>();

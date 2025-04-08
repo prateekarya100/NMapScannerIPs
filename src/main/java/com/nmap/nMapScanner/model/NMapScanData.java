@@ -18,5 +18,4 @@ public class NMapScanData {
     private String target;
     private String profile;
 
-
 }
