@@ -34,8 +34,8 @@ public class ScanController {
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         NMapScanData nMapScanData = new NMapScanData();
 //        nMapScanData.setUsername(authentication.getName());
-        List<String> scanType = SCAN_PROFILES.keySet().stream().toList();
-        model.addAttribute("scanType", scanType);
+        List<String> scanTypes = SCAN_PROFILES.keySet().stream().toList();
+        model.addAttribute("scanTypes", scanTypes);
         model.addAttribute("nMapScanData", nMapScanData);
         return "rangeIP";
     }

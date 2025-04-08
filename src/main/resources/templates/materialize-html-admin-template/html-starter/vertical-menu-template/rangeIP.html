@@ -265,9 +265,16 @@
                   <!-- Profile -->
                   <div class="mb-4">
                     <label for="profile" class="form-label">Scan Profile</label>
-                    <select id="profile" th:field=  "*{profile}" class="form-control" required>
+                    <input type="text" id="profile" th:field="*{profile}" placeholder="Enter profile name here" class="form-control" required>
+                  </div>
+
+
+                  <!-- Profile -->
+                  <div class="mb-4">
+                    <label for="scanType" class="form-label">Scan Type</label>
+                    <select id="scanType" th:field=  "*{scanType}" class="form-control" required>
                       <option value="">Select Profile</option>
-                      <option th:each="profile : ${scanType}" th:value="${profile}" th:text="${profile}"></option>
+                      <option th:each="scanType : ${scanTypes}" th:value="${scanType}" th:text="${scanType}"></option>
                     </select>
                   </div>
 

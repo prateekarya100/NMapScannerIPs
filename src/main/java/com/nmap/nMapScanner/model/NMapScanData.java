@@ -16,6 +16,8 @@ public class NMapScanData {
     private Long id;
 
     private String target;
+    private String scanType;
+
     private String profile;
 
 }

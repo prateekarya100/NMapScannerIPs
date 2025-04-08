@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -19,7 +17,7 @@ public class ScanSession {
     private Long id;
 
     private String target;
-    private String profile;
+    private String scanType;
 
     private LocalDateTime scanTime;
 
@@ -28,4 +26,10 @@ public class ScanSession {
 
     @Lob
     private String jsonResult;
+
+    private String profile;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "scan_data_id")
+    private NMapScanData scanData;
 }
