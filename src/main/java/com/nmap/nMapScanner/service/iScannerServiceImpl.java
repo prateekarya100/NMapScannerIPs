@@ -10,7 +10,6 @@ import com.nmap.nMapScanner.repository.ScanSessionRepository;
 import com.nmap.nMapScanner.repository.ScannedIPRepository;
 import com.nmap.nMapScanner.repository.ScannedPortRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -35,34 +34,34 @@ public class iScannerServiceImpl implements IScannerService{
     private ScannedPortRepository scannedPortRepository;
 
     @Autowired
-    private NMapScanDataRepo profileRepo;
+    private NMapScanDataRepo nMapScanDataRepo;
 
     @Override
-    @Async
-    public void scanAndSave(NMapScanData scanData) {
+    public void scanAndSave(NMapScanData nMapScanData) {
 
-        // saving profile info
-        profileRepo.save(scanData);
+        // save scan input profile
+        nMapScanDataRepo.save(nMapScanData);
 
-        // Save initial session
+//        // Save initial session
 //        ScanSession session = new ScanSession();
-//        session.setTarget(scanData.getTarget());
-//        session.setScanType(scanData.getScanType());
+//        session.setTarget(nMapScanData.getTarget());
+//        session.setProfile(nMapScanData.getProfile());
 //        session.setScanTime(LocalDateTime.now());
-//        session.setProfile(scanData.getProfile());
+//        session.setScanType(nMapScanData.getScanType());
 //        scanSessionRepository.save(session);
 
+        // Save initial session with reference to NMapScanData
         ScanSession session = new ScanSession();
-        session.setTarget(scanData.getTarget());
-        session.setProfile(scanData.getProfile());
+        session.setTarget(nMapScanData.getTarget());
+        session.setProfile(nMapScanData.getProfile());
         session.setScanTime(LocalDateTime.now());
-        session.setScanType(scanData.getScanType());
-        session.setScanData(scanData); // set FK reference here
+        session.setScanType(nMapScanData.getScanType());
+        session.setScanData(nMapScanData); // ✅ Associate NMapScanData (sets scan_data_id)
         scanSessionRepository.save(session);
 
 
         // Build command
-        String command = buildNmapCommand(scanData.getTarget(), scanData.getScanType());
+        String command = buildNmapCommand(nMapScanData.getTarget(), nMapScanData.getProfile());
         System.out.println("Executing Nmap command: " + command);
 
         try {
