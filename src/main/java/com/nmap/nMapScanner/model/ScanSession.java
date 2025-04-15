@@ -1,15 +1,12 @@
 package com.nmap.nMapScanner.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
+@Data
 @Entity
-@Getter @Setter
 @AllArgsConstructor @NoArgsConstructor
 public class ScanSession {
     @Id

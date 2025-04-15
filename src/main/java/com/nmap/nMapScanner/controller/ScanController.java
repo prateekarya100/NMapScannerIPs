@@ -54,4 +54,5 @@ public class ScanController {
         return "redirect:/scan/scanned";
     }
 
+
 }

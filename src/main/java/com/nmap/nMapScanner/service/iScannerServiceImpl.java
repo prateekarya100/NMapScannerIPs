@@ -85,267 +85,22 @@ public class iScannerServiceImpl implements IScannerService{
     }
 
     private String buildNmapCommand(String target, String profile) {
-        String args;
-        switch (profile.toLowerCase()) {
-            case "ping scan":
-                args = "-sV -sn -p 1-1000";
-                break;
-            case "quick scan":
-                args = "-sS -sV -T4 -p 1-1000 -F --reason -v";
-                break;
-            case "regular scan":
-                args = "-sS -sV -p 1-1000 --reason -v";
-                break;
-            case "intense scan":
-                args = "-sS -sV -T4 -A -p 1-1000 -v --reason";
-                break;
-            case "quick traceroute":
-                args = "-sV -sn -p 1-1000 --traceroute";
-                break;
-            case "intense udp":
-                args = "-sS -sU -sV -T4 -A -p 1-1000 -v --reason";
-                break;
-            case "all tcp ports":
-                args = "-sS -sV -p 1-65535 -T4 --reason -v";
-                break;
-            case "no ping":
-                args = "-sS -sV -T4 -A -v -Pn -p 1-1000 --reason";
-                break;
-            case "quick plus":
-                args = "-sS -sV -T4 -O -F --version-light -p 1-1000 --reason -v";
-                break;
-            case "vulners":
-                args = "-sV --script vulners -p 1-1000 --reason -v";
-                break;
-            default:
-                args = "-sS -sV -p 1-1000 --reason -v"; // fallback
-        }
+        String args = switch (profile.toLowerCase()) {
+            case "ping scan" -> "-sV -sn -p 1-1000";
+            case "quick scan" -> "-sS -sV -T4 -p 1-1000 -F --reason -v";
+            case "regular scan" -> "-sS -sV -p 1-1000 --reason -v";
+            case "intense scan" -> "-sS -sV -T4 -A -p 1-1000 -v --reason";
+            case "quick traceroute" -> "-sV -sn -p 1-1000 --traceroute";
+            case "intense udp" -> "-sS -sU -sV -T4 -A -p 1-1000 -v --reason";
+            case "all tcp ports" -> "-sS -sV -p 1-65535 -T4 --reason -v";
+            case "no ping" -> "-sS -sV -T4 -A -v -Pn -p 1-1000 --reason";
+            case "quick plus" -> "-sS -sV -T4 -O -F --version-light -p 1-1000 --reason -v";
+            case "vulners" -> "-sV --script vulners -p 1-1000 --reason -v";
+            default -> "-sS -sV -p 1-1000 --reason -v"; // fallback
+        };
         return "nmap " + args + " " + target;
 
     }
-
-//    private void parseAndSaveOutput(String output, ScanSession session) {
-//        String[] lines = output.split("\n");
-//        ScannedIP currentIP = null;
-//
-//        Map<String, List<Map<String, String>>> jsonResultMap = new LinkedHashMap<>();
-//
-//        for (String line : lines) {
-//            line = line.trim();
-//
-//            // Match IP line
-//            if (line.startsWith("Nmap scan report for")) {
-//                String ip = line.replace("Nmap scan report for", "").trim();
-//                currentIP = scannedIPRepository.findByIpAddress(ip)
-//                        .orElseGet(() -> {
-//                            ScannedIP newIp = new ScannedIP();
-//                            newIp.setIpAddress(ip);
-//                            return scannedIPRepository.save(newIp);
-//                        });
-//
-//                jsonResultMap.put(ip, new ArrayList<>());
-//            }
-//
-//            // Match port line: open, closed, filtered etc.
-//            else if (line.matches("^\\d+/\\w+\\s+\\w+(\\s+\\S+.*)?")) {
-//                if (currentIP != null) {
-//                    String[] parts = line.split("\\s+", 5); // Example: "80/tcp open http Apache httpd"
-//
-//                    String[] portInfo = parts[0].split("/");
-//                    int port = Integer.parseInt(portInfo[0]);
-//                    String protocol = portInfo[1];
-//                    String state = parts[1]; // open, closed, filtered
-//                    String service = parts.length >= 3 ? parts[2] : "unknown";
-//                    String version = parts.length >= 5 ? parts[4] :
-//                            (parts.length >= 4 ? parts[3] : "unknown");
-//
-//                    // Save to DB
-//                    ScannedPort scannedPort = new ScannedPort();
-//                    scannedPort.setPort(port);
-//                    scannedPort.setProtocol(protocol);
-//                    scannedPort.setState(state);
-//                    scannedPort.setService(service);
-//                    scannedPort.setVersion(version);
-//                    scannedPort.setScannedIP(currentIP);
-//                    scannedPort.setScanSession(session);
-//                    scannedPortRepository.save(scannedPort);
-//
-//                    // Add to JSON result
-//                    Map<String, String> portMap = new LinkedHashMap<>();
-//                    portMap.put("port", String.valueOf(port));
-//                    portMap.put("protocol", protocol);
-//                    portMap.put("state", state);
-//                    portMap.put("service", service);
-//                    portMap.put("version", version);
-//                    jsonResultMap.get(currentIP.getIpAddress()).add(portMap);
-//                }
-//            }
-//        }
-//
-//        // Save final JSON result
-//        try {
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonResultMap);
-//            session.setJsonResult(jsonString);
-//            scanSessionRepository.save(session);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-//    private void parseAndSaveOutput(String output, ScanSession session) {
-//        String[] lines = output.split("\n");
-//        ScannedIP currentIP = null;
-//
-//        Map<String, List<Map<String, String>>> jsonResultMap = new LinkedHashMap<>();
-//
-//        for (String line : lines) {
-//            line = line.trim();
-//
-//            // Detect IP address
-//            if (line.startsWith("Nmap scan report for")) {
-//                String ip = line.replace("Nmap scan report for", "").trim();
-//                currentIP = scannedIPRepository.findByIpAddress(ip)
-//                        .orElseGet(() -> {
-//                            ScannedIP newIp = new ScannedIP();
-//                            newIp.setIpAddress(ip);
-//                            return scannedIPRepository.save(newIp);
-//                        });
-//
-//                jsonResultMap.put(ip, new ArrayList<>());
-//            }
-//
-//            // Match any port line: open/closed/filtered
-//            else if (line.matches("^\\d+/\\w+\\s+(open|closed|filtered)(\\s+\\S+.*)?")) {
-//                if (currentIP != null) {
-//                    String[] parts = line.split("\\s+", 5); // Example: "80/tcp open http Apache"
-//                    String[] portInfo = parts[0].split("/");
-//                    int port = Integer.parseInt(portInfo[0]);
-//                    String protocol = portInfo[1];
-//                    String state = parts[1]; // open, closed, filtered
-//                    String service = parts.length >= 3 ? parts[2] : "unknown";
-//                    String version = parts.length >= 5 ? parts[4] :
-//                            (parts.length >= 4 ? parts[3] : "unknown");
-//
-//                    // Save to DB
-//                    ScannedPort scannedPort = new ScannedPort();
-//                    scannedPort.setPort(port);
-//                    scannedPort.setProtocol(protocol);
-//                    scannedPort.setState(state);
-//                    scannedPort.setService(service);
-//                    scannedPort.setVersion(version);
-//                    scannedPort.setScannedIP(currentIP);
-//                    scannedPort.setScanSession(session);
-//                    scannedPortRepository.save(scannedPort);
-//
-//                    // Add to JSON
-//                    Map<String, String> portMap = new LinkedHashMap<>();
-//                    portMap.put("port", String.valueOf(port));
-//                    portMap.put("protocol", protocol);
-//                    portMap.put("state", state);
-//                    portMap.put("service", service);
-//                    portMap.put("version", version);
-//                    jsonResultMap.get(currentIP.getIpAddress()).add(portMap);
-//                }
-//            }
-//        }
-//
-//        // Save JSON to session
-//        try {
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonResultMap);
-//            session.setJsonResult(jsonString);
-//            scanSessionRepository.save(session);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-//    private void parseAndSaveOutput(String output, ScanSession session) {
-//        String[] lines = output.split("\n");
-//        ScannedIP currentIP = null;
-//
-//        Map<String, List<Map<String, String>>> jsonResultMap = new LinkedHashMap<>();
-//        Set<Integer> knownPorts = new HashSet<>(); // Track already parsed ports
-//
-//        int notShownClosedCount = 0;
-//
-//        for (String line : lines) {
-//            line = line.trim();
-//
-//            // Detect IP address
-//            if (line.startsWith("Nmap scan report for")) {
-//                String ip = line.replace("Nmap scan report for", "").trim();
-//                currentIP = scannedIPRepository.findByIpAddress(ip)
-//                        .orElseGet(() -> {
-//                            ScannedIP newIp = new ScannedIP();
-//                            newIp.setIpAddress(ip);
-//                            return scannedIPRepository.save(newIp);
-//                        });
-//
-//                jsonResultMap.put(ip, new ArrayList<>());
-//                knownPorts.clear(); // Reset for new IP
-//            }
-//
-//            // Match any port line: open, closed, filtered, etc.
-//            else if (line.matches("^\\d+/\\w+\\s+(open|closed|filtered)(\\s+\\S+.*)?")) {
-//                if (currentIP != null) {
-//                    String[] parts = line.split("\\s+", 5);
-//                    String[] portInfo = parts[0].split("/");
-//                    int port = Integer.parseInt(portInfo[0]);
-//                    String protocol = portInfo[1];
-//                    String state = parts[1];
-//                    String service = parts.length >= 3 ? parts[2] : "unknown";
-//                    String version = parts.length >= 5 ? parts[4] :
-//                            (parts.length >= 4 ? parts[3] : "unknown");
-//
-//                    knownPorts.add(port); // Track the parsed port
-//
-//                    // Save to DB
-//                    ScannedPort scannedPort = new ScannedPort();
-//                    scannedPort.setPort(port);
-//                    scannedPort.setProtocol(protocol);
-//                    scannedPort.setState(state);
-//                    scannedPort.setService(service);
-//                    scannedPort.setVersion(version);
-//                    scannedPort.setScannedIP(currentIP);
-//                    scannedPort.setScanSession(session);
-//                    scannedPortRepository.save(scannedPort);
-//
-//                    // Add to JSON
-//                    Map<String, String> portMap = new LinkedHashMap<>();
-//                    portMap.put("port", String.valueOf(port));
-//                    portMap.put("protocol", protocol);
-//                    portMap.put("state", state);
-//                    portMap.put("service", service);
-//                    portMap.put("version", version);
-//                    jsonResultMap.get(currentIP.getIpAddress()).add(portMap);
-//                }
-//            }
-//
-//            // Handle summary line like: Not shown: 999 closed tcp ports (reset)
-//            else if (line.startsWith("Not shown:") && line.contains("closed tcp ports")) {
-//                notShownClosedCount = extractClosedPortCount(line); // helper method
-//            }
-//        }
-//
-//        // If summary line said there were closed ports not shown, log in JSON for completeness
-//        if (currentIP != null && notShownClosedCount > 0) {
-//            Map<String, String> closedSummary = new LinkedHashMap<>();
-//            closedSummary.put("summary", notShownClosedCount + " closed tcp ports not shown in output");
-//            jsonResultMap.get(currentIP.getIpAddress()).add(closedSummary);
-//        }
-//
-//        // Save JSON to session
-//        try {
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonResultMap);
-//            session.setJsonResult(jsonString);
-//            scanSessionRepository.save(session);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     private void parseAndSaveOutput(String output, ScanSession session) {
         String[] lines = output.split("\n");
@@ -425,7 +180,7 @@ public class iScannerServiceImpl implements IScannerService{
                 if (!knownPorts.contains(port)) {
                     // Save to DB
                     ScannedPort closedPort = new ScannedPort();
-                    closedPort.setPort(port);
+                    closedPort.setPort(0);
                     closedPort.setProtocol("tcp");
                     closedPort.setState("closed");
                     closedPort.setService("unknown");
@@ -436,7 +191,7 @@ public class iScannerServiceImpl implements IScannerService{
 
                     // Add to JSON
                     Map<String, String> portMap = new LinkedHashMap<>();
-                    portMap.put("port", String.valueOf(port));
+                    portMap.put("port", String.valueOf(0));
                     portMap.put("protocol", "tcp");
                     portMap.put("state", "closed");
                     portMap.put("service", "unknown");
