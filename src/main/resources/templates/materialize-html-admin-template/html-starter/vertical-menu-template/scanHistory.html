@@ -261,7 +261,7 @@
         <div class="card mb-4 p-4" style="margin-right: 1rem;">
           <h5 class="mb-3">Profiles Overview</h5>
           <div class="table-responsive">
-            <table class="table table-bordered">
+            <table class="table table-bordered highlight centered">
               <thead class="table-light">
               <tr>
                 <th>Profile Name</th>
@@ -274,11 +274,21 @@
               <tbody>
               <tr th:each="entry : ${scanHistory}">
                 <td>
-                  <a th:href="@{/dashboard/profile/{name}(name=${entry.key})}" class="text-decoration-underline" th:text="${entry.key}">Profile Name</a>
+                  <a th:href="@{/dashboard/profile/{name}(name=${entry.key})}"
+                     class="text-decoration-underline"
+                     th:text="${entry.key}">Profile Name</a>
                 </td>
                 <td th:text="${entry.value.size()}">0</td>
-                <td th:text="${#temporals.format(entry.value.get(0).scanTime, 'yyyy-MM-dd HH:mm')}">First</td>
-                <td th:text="${#temporals.format(entry.value.get(entry.value.size() - 1).scanTime, 'yyyy-MM-dd HH:mm')}">Last</td>
+
+                <!-- If scan list is not empty -->
+                <td th:if="${entry.value.size() > 0}"
+                    th:text="${#temporals.format(entry.value.get(0).scanTime, 'yyyy-MM-dd HH:mm')}">First</td>
+                <td th:if="${entry.value.size() == 0}">—</td>
+
+                <td th:if="${entry.value.size() > 0}"
+                    th:text="${#temporals.format(entry.value.get(entry.value.size() - 1).scanTime, 'yyyy-MM-dd HH:mm')}">Last</td>
+                <td th:if="${entry.value.size() == 0}">—</td>
+
                 <td>
                   <form th:action="@{/scan/rescan}" method="post">
                     <input type="hidden" name="profile" th:value="${entry.key}" />
@@ -290,6 +300,7 @@
             </table>
           </div>
         </div>
+
 
 
         <div class="content-backdrop fade"></div>

@@ -22,6 +22,6 @@ public class ScanHistoryService {
     }
 
     public List<ScanSession> getScansForProfile(String name) {
-      return scanSessionRepository.findAllByOrderByScanTimeDesc();
+      return scanSessionRepository.findByProfileIgnoreCase(name);
     }
 }
