@@ -259,7 +259,6 @@
         <!-- Content -->
 
         <div class="container mt-5">
-          <div class="container mt-5">
             <h3 class="mb-4">Profile: <span th:text="${profileName}">Profile Name</span></h3>
 
             <!-- Tabs Nav -->
@@ -308,50 +307,63 @@
               <!-- History -->
               <div class="tab-pane fade" id="history" role="tabpanel">
                 <div class="card p-4">
-                  <h3>Scan History for Profile: <span th:text="${profileName}"></span></h3>
+                  <div class="card">
+<!--                    <h3>Scan History for Profile: <span th:text="${profileName}"></span></h3>-->
+                    <div class="table-responsive text-nowrap">
+                      <table class="table">
+                        <thead>
+                        <tr>
+                          <th>Target IP</th>
+                          <th>Scan Type</th>
+                          <th>Scan Time</th>
+                          <th>Status</th>
+                          <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody class="table-border-bottom-0">
+                        <tr th:each="entry : ${groupedScans}">
+                          <td>
+                            <i class="ri-global-line ri-22px me-2" style="color: #87CEEB;"></i>
+                            <!-- Target IP -->
+                            <span class="fw-medium" th:text="${entry.key}">192.168.1.58</span>
+                          </td>
 
-                  <div th:each="entry : ${groupedScans}">
-                    <h4>Target IP: <span th:text="${entry.key}"></span></h4>
-                    <ul>
-                      <li th:each="scan : ${entry.value}">
-                        <b>Scan Type:</b> <span th:text="${scan.scanType}"></span> |
-                        <b>Time:</b> <span th:text="${scan.scanTime}"></span>
-                      </li>
-                    </ul>
+                          <!-- Iterate over the list of ScanSessionSummary for each IP and display scan type and time -->
+                          <td th:each="scan : ${entry.value}">
+                            <span th:text="${scan.scanType}">Regular Scan</span>
+                          </td>
+
+                          <td th:each="scan : ${entry.value}">
+                            <!-- Format the scanTime -->
+<!--                            <span th:text="${scan.scanTime}">Time</span>-->
+                            <span th:text="${scan.scanTime}">Time</span>
+                          </td>
+                          <td>
+                            <span class="badge rounded-pill bg-label-primary me-1 green">Completed</span>
+                          </td>
+
+                          <td>
+                            <button class="btn btn-primary waves-effect waves-light btn-xs">Rescan</button>
+                          </td>
+                        </tr>
+
+
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                      <tbody>
-<!--                      <tr th:each="session, iterStat : ${sessions}">-->
-<!--                        <td th:text="${iterStat.count}">1</td>-->
-<!--                        <td th:text="${session.target}">Target</td>-->
-<!--                        <td th:text="${session.scanType}">Scan Type</td>-->
-<!--                        <td th:text="${#temporals.format(session.scanTime, 'yyyy-MM-dd HH:mm')}">Scan Time</td>-->
-<!--                        <td>-->
-<!--                          <pre class="mb-0" th:text="${session.jsonResult}">JSON Result</pre>-->
-<!--                        </td>-->
-<!--                      </tr>-->
-<!--                      <tr th:if="${sessions.size() == 0}">-->
-<!--                        <td colspan="5" class="text-center">No scan history available for this profile.</td>-->
-<!--                      </tr>-->
-                      </tbody>
-                </div>
                 </div>
               </div>
             </div>
 
-
             <div class="content-backdrop fade"></div>
+        </div>
       </div>
-      <!-- Content wrapper -->
     </div>
-    <!-- / Layout page -->
   </div>
-
-  <!-- Overlay -->
   <div class="layout-overlay layout-menu-toggle"></div>
-
   <!-- Drag Target Area To SlideIn Menu On Small Screens -->
   <div class="drag-target"></div>
-</div>
 <!-- / Layout wrapper -->
 
 <!-- Core JS -->
@@ -365,13 +377,10 @@
 
 <script src="../../assets/vendor/js/menu.js"></script>
 
-<!-- endbuild -->
 
-<!-- Vendors JS -->
-
-<!-- Main JS -->
+  <!-- Main JS -->
 <script src="../../assets/js/main.js"></script>
-
+</div>
 <!-- Page JS -->
 </body>
 </html>

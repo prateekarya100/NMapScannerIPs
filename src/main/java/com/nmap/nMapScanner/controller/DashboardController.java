@@ -50,6 +50,8 @@ public class DashboardController {
                         ), Collectors.toList())
                 ));
 
+        System.out.println(groupedByTarget);
+
         model.addAttribute("profileName", name);
         model.addAttribute("groupedScans", groupedByTarget);
 
