@@ -264,7 +264,7 @@
             <!-- Tabs Nav -->
             <ul class="nav nav-tabs mb-3" id="profileTabs" role="tablist">
               <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab">Profile Summary</button>
+                <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab">Scan Summary</button>
               </li>
               <li class="nav-item" role="presentation">
                 <button class="nav-link" id="host-tab" data-bs-toggle="tab" data-bs-target="#host" type="button" role="tab">Hosts</button>
@@ -282,9 +282,65 @@
               <!-- Profile Summary -->
               <div class="tab-pane fade show active" id="summary" role="tabpanel">
                 <div class="card p-4">
-                  <h5 class="mb-3">Profile Summary</h5>
-                  <p>Summary details about the profile <strong th:text="${profileName}"> Name</strong> will go here.</p>
-                  <!-- Add stats or aggregated data here if needed -->
+                  <h5 class="mb-3">Scan Details</h5>
+                  <!-- First Row: Critical & High -->
+                  <div class="d-flex" style="display: flex; gap: 2rem; margin-bottom: 1rem;">
+                    <div class="center-align">
+                      <i class="ri-shield-star-fill ri-2x" style="color: red;"></i> <!-- Critical -->
+                      <span class="badge red white-text">0</span>
+                      <p class="red-text">Critical Vulnerabilities</p>
+                    </div>
+                    <div class="center-align">
+                      <i class="ri-shield-cross-fill ri-2x" style="color: #fb8c00;"></i>
+                      <span class="badge orange white-text">0</span>
+                      <p class="orange-text">High Vulnerabilities</p>
+                    </div>
+                  </div>
+
+                  <!-- Second Row: Medium & Low -->
+                  <div class="d-flex" style="display: flex; gap: 2rem;">
+                    <div class="center-align">
+                      <i class="ri-shield-check-fill ri-2x" style="color: #fbc02d;"></i> <!-- Warm yellow -->
+                      <span class="badge amber black-text">0</span>
+                      <p class="amber-text">Medium Vulnerabilities</p>
+                    </div>
+                    <div class="center-align">
+                      <i class="ri-shield-user-fill ri-2x" style="color: #8bc34a;"></i> <!-- Light Green (Low) -->
+
+                      <span class="badge green white-text">0</span>
+                      <p class="green-text">Low Vulnerabilities</p>
+                    </div>
+                  </div>
+
+
+                  <h5 class="mb-3">Details</h5>
+                  <div class="card-panel z-depth-2" style="padding: 1.5rem; border-radius: 12px;">
+                    <h6 class="mb-3"><i class="ri-shield-check-fill" style="color: #4caf50;"></i> Scan Details</h6>
+
+                    <ul class="collection">
+                      <li class="collection-item">
+                        <strong>Scan Name:</strong> Advanced Network Vulnerability Scan
+                      </li>
+                      <li class="collection-item">
+                        <strong>Plugin Set ID:</strong> 1345
+                      </li>
+                      <li class="collection-item">
+                        <strong>CVSS Score:</strong> 6.3
+                      </li>
+                      <li class="collection-item">
+                        <strong>Scan Template:</strong> Advanced Scan
+                      </li>
+                      <li class="collection-item">
+                        <strong>Start Time:</strong> 2025-04-18 10:32 AM
+                      </li>
+                      <li class="collection-item">
+                        <strong>End Time:</strong> 2025-04-18 10:38 AM
+                      </li>
+                    </ul>
+                  </div>
+
+                  <!--                  <p>Summary details about the profile <strong th:text="${profileName}"> Name</strong> will go here.</p>-->
+
                 </div>
               </div>
 
