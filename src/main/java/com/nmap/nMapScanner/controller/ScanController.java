@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequestMapping(value = "/scan")
@@ -67,11 +69,28 @@ public class ScanController {
     public String createScanProfile(@ModelAttribute("scanProfile") NMapScanData nMapScanData,
                                     Model model){
         if (nmapScanDataRepository.existsByProfile(nMapScanData.getProfile())) {
+            model.addAttribute("nMapScanData", nMapScanData);
+            List<String> scanTypes = SCAN_PROFILES.keySet().stream().toList();
+            model.addAttribute("scanTypes", scanTypes);
             model.addAttribute("error", "Profile name already exists. Please choose another.");
-            return "redirect:/scan/web"; // your form view name
+                return "rangeIP"; // your form view name
         }
 
         scannerService.scanAndSave(nMapScanData);
+        return "redirect:/dashboard/profiles";
+    }
+
+    @PostMapping("/rescan")
+    public String rescanProfile(@RequestParam("profile") String profileName, RedirectAttributes redirectAttributes) {
+        Optional<NMapScanData> optionalProfile = nmapScanDataRepository.findByProfile(profileName);
+
+        if (optionalProfile.isPresent()) {
+            scannerService.scanAndSave(optionalProfile.get());
+            redirectAttributes.addFlashAttribute("message", "Re-scan started for profile: " + profileName);
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Profile not found: " + profileName);
+        }
+
         return "redirect:/dashboard/profiles";
     }
 

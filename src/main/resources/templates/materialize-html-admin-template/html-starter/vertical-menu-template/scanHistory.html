@@ -269,6 +269,7 @@
                     <th>Profile Name</th>
                     <th>Total Scans</th>
                     <th>Last Scan</th>
+                    <th>Action</th>
                   </tr>
                   </thead>
                   <tbody class="table-border-bottom-0">
@@ -282,6 +283,26 @@
 
                     <td th:text="${entry.value.size()}">0</td>
                     <td th:text="${#temporals.format(entry.value.get(entry.value.size() - 1).scanTime, 'yyyy-MM-dd HH:mm')}"></td>
+
+<!--                    <td>-->
+<!--                      <form th:action="@{/scan/rescan}" method="post">-->
+<!--                          <input type="hidden" name="profile" th:value="${entry.key}" />-->
+<!--                          <input type="hidden" name="target" th:value="${entry.key}" />-->
+<!--                          <button type="submit" class="btn btn-sm btn-primary shadow-sm px-3 py-2">-->
+<!--                            ⟲ Rescan-->
+<!--                          </button>-->
+<!--                      </form>-->
+<!--                    </td>-->
+                    <td>
+                      <form th:action="@{/scan/rescan}" method="post">
+                        <input type="hidden" name="profile" th:value="${entry.key}" />
+                        <input type="hidden" name="target" th:value="${entry.key}" />
+                        <button type="submit" class="btn btn-sm btn-primary shadow-sm px-3 py-2"
+                                style="border: none; border-radius: 0; margin-top: 0;">
+                          ⟲ Rescan
+                        </button>
+                      </form>
+                    </td>
                   </tr>
                   </tbody>
                 </table>

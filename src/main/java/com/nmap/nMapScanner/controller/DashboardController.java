@@ -26,12 +26,6 @@ public class DashboardController {
     public String viewScanHistory(Model model) {
         Map<String, List<ScanSession>> groupedHistory = scanHistoryService.getScanHistoryGroupedByProfile();
         model.addAttribute("scanHistory", groupedHistory);
-//        groupedHistory.forEach((profile, sessions) -> {
-//            System.out.println("=== Profile: " + profile + " ===");
-//            sessions.forEach(s -> System.out.printf("Target: %s | Type: %s | Time: %s%n | All Scans on Range Of IP: %s ",
-//                    s.getTarget(), s.getScanType(), s.getScanTime(),s.getJsonResult()));
-//        });
-
         return "scanHistory";
     }
 
@@ -39,6 +33,7 @@ public class DashboardController {
     public String viewProfileDetails(@PathVariable String name, Model model) {
         // Fetch all scan sessions for the given profile
         List<ScanSession> sessions = scanHistoryService.getScansForProfile(name);
+        System.out.println(sessions);
 
         // Convert to list of ScanSessionSummary, sorted by most recent scan first
         List<ScanSessionSummary> summaries = sessions.stream()
