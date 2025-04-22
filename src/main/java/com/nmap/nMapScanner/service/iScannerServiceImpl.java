@@ -70,7 +70,7 @@ public class iScannerServiceImpl implements IScannerService{
 
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                System.err.println("❌ Nmap command failed with exit code " + exitCode);
+                System.err.println("Nmap command failed with exit code " + exitCode);
                 return;
             }
 

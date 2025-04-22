@@ -261,6 +261,8 @@
               <div class="card-body mx-4 my-5 p-5 shadow rounded"> <!-- mx-4 adds left/right margins -->
 
                 <form th:action="@{/scan/form/submit}" th:object="${nMapScanData}" method="post">
+                  <!-- Display the error message if it exists -->
+                  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
                   <!-- Profile -->
                   <div class="mb-4">

@@ -373,38 +373,27 @@
                           <th>Scan Type</th>
                           <th>Scan Time</th>
                           <th>Status</th>
-                          <th>Actions</th>
+<!--                          <th>Actions</th>-->
                         </tr>
                         </thead>
                         <tbody class="table-border-bottom-0">
-                        <tr th:each="entry : ${groupedScans}">
+                        <tr th:each="scan : ${scanSummaries}">
                           <td>
                             <i class="ri-global-line ri-22px me-2" style="color: #87CEEB;"></i>
-                            <!-- Target IP -->
-                            <span class="fw-medium" th:text="${entry.key}">192.168.1.58</span>
+                            <span class="fw-medium" th:text="${scan.target}">192.168.1.1-10</span>
                           </td>
-
-                          <!-- Iterate over the list of ScanSessionSummary for each IP and display scan type and time -->
-                          <td th:each="scan : ${entry.value}">
-                            <span th:text="${scan.scanType}">Regular Scan</span>
+                          <td>
+                            <span th:text="${scan.scanType}">Quick Scan</span>
                           </td>
-
-                          <td th:each="scan : ${entry.value}">
-                            <!-- Format the scanTime -->
-<!--                            <span th:text="${scan.scanTime}">Time</span>-->
-                            <span th:text="${scan.scanTime}">Time</span>
+                          <td>
+                            <span th:text="${#temporals.format(scan.scanTime, 'yyyy-MM-dd HH:mm:ss')}">2025-04-22 10:40:38</span>
                           </td>
                           <td>
                             <span class="badge rounded-pill bg-label-primary me-1 green">Completed</span>
                           </td>
-
-                          <td>
-                            <button class="btn btn-primary waves-effect waves-light btn-xs">Rescan</button>
-                          </td>
                         </tr>
-
-
                         </tbody>
+
                       </table>
                     </div>
                   </div>

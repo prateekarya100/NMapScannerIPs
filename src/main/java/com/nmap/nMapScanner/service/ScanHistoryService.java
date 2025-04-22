@@ -14,14 +14,38 @@ public class ScanHistoryService {
     @Autowired
     private ScanSessionRepository scanSessionRepository;
 
+    // ✅ Get all scan sessions grouped by profile name (latest first)
     public Map<String, List<ScanSession>> getScanHistoryGroupedByProfile() {
         List<ScanSession> sessions = scanSessionRepository.findAll();
         return sessions.stream()
-                .sorted(Comparator.comparing(ScanSession::getScanTime))
-                .collect(Collectors.groupingBy(ScanSession::getProfile, LinkedHashMap::new, Collectors.toList()));
+                .sorted(Comparator.comparing(ScanSession::getScanTime).reversed())
+                .collect(Collectors.groupingBy(
+                        s -> Optional.ofNullable(s.getProfile()).orElse("Unlabeled"),
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
     }
 
-    public List<ScanSession> getScansForProfile(String name) {
-      return scanSessionRepository.findByProfileIgnoreCase(name);
+    // ✅ Get all scans for a given profile (case-insensitive)
+    public List<ScanSession> getScansForProfile(String profileName) {
+        return scanSessionRepository.findByProfileIgnoreCase(profileName);
+    }
+
+//    // ✅ Get the most recent scan session (across all profiles)
+//    public Optional<ScanSession> getLatestScan() {
+//        return scanSessionRepository.findAllByOrderByScanTimeDesc()
+//                .stream().findFirst();
+//    }
+
+    // ✅ Get the most recent scan for a specific profile
+    public Optional<ScanSession> getLatestScanForProfile(String profileName) {
+        return scanSessionRepository.findByProfileIgnoreCase(profileName)
+                .stream()
+                .max(Comparator.comparing(ScanSession::getScanTime));
+    }
+
+    // ✅ Get scan session by ID
+    public Optional<ScanSession> getScanById(Long id) {
+        return scanSessionRepository.findById(id);
     }
 }

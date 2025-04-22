@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NMapScanDataRepo extends JpaRepository<NMapScanData,Long> {
+
+    boolean existsByProfile(String profile);
 }

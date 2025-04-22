@@ -37,23 +37,22 @@ public class DashboardController {
 
     @GetMapping("/profile/{name}")
     public String viewProfileDetails(@PathVariable String name, Model model) {
+        // Fetch all scan sessions for the given profile
         List<ScanSession> sessions = scanHistoryService.getScansForProfile(name);
 
-        Map<String, List<ScanSessionSummary>> groupedByTarget = sessions.stream()
+        // Convert to list of ScanSessionSummary, sorted by most recent scan first
+        List<ScanSessionSummary> summaries = sessions.stream()
                 .sorted(Comparator.comparing(ScanSession::getScanTime).reversed())
-                .collect(Collectors.groupingBy(
-                        ScanSession::getTarget,
-                        Collectors.mapping(s -> new ScanSessionSummary(
-                                s.getTarget(),
-                                s.getScanType(),
-                                s.getScanTime()
-                        ), Collectors.toList())
-                ));
+                .map(s -> new ScanSessionSummary(
+                        s.getTarget(),
+                        s.getScanType(),
+                        s.getScanTime()
+                ))
+                .collect(Collectors.toList());
 
-        System.out.println(groupedByTarget);
-
+        // Add data to the model
         model.addAttribute("profileName", name);
-        model.addAttribute("groupedScans", groupedByTarget);
+        model.addAttribute("scanSummaries", summaries);
 
         return "profile_details";
     }

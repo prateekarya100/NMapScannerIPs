@@ -18,6 +18,7 @@ public class NMapScanData {
     private String target;
     private String scanType;
 
+    @Column(unique = true)
     private String profile;
 
 }

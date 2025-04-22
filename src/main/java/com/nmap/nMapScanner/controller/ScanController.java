@@ -1,6 +1,7 @@
 package com.nmap.nMapScanner.controller;
 
 import com.nmap.nMapScanner.model.NMapScanData;
+import com.nmap.nMapScanner.repository.NMapScanDataRepo;
 import com.nmap.nMapScanner.service.IScannerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,9 @@ public class ScanController {
 
     @Autowired
     private IScannerService scannerService;
+
+    @Autowired
+    private NMapScanDataRepo nmapScanDataRepository;
 
 //    private static final Map<String, String> SCAN_PROFILES = Map.of(
 //            "ping scan", "nmap -sV -sn ",
@@ -62,7 +66,10 @@ public class ScanController {
     @PostMapping(value = "/form/submit")
     public String createScanProfile(@ModelAttribute("scanProfile") NMapScanData nMapScanData,
                                     Model model){
-//        System.out.println(nMapScanData);
+        if (nmapScanDataRepository.existsByProfile(nMapScanData.getProfile())) {
+            model.addAttribute("error", "Profile name already exists. Please choose another.");
+            return "redirect:/scan/web"; // your form view name
+        }
 
         scannerService.scanAndSave(nMapScanData);
         return "redirect:/dashboard/profiles";
