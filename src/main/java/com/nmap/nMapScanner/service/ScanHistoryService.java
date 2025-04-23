@@ -17,6 +17,7 @@ public class ScanHistoryService {
     // ✅ Get all scan sessions grouped by profile name (latest first)
     public Map<String, List<ScanSession>> getScanHistoryGroupedByProfile() {
         List<ScanSession> sessions = scanSessionRepository.findAll();
+
         return sessions.stream()
                 .sorted(Comparator.comparing(ScanSession::getScanTime).reversed())
                 .collect(Collectors.groupingBy(

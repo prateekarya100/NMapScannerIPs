@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class DashboardController {
     @GetMapping("/profiles")
     public String viewScanHistory(Model model) {
         Map<String, List<ScanSession>> groupedHistory = scanHistoryService.getScanHistoryGroupedByProfile();
+        groupedHistory.values().forEach(Collections::reverse);
         model.addAttribute("scanHistory", groupedHistory);
         return "scanHistory";
     }
@@ -33,7 +35,7 @@ public class DashboardController {
     public String viewProfileDetails(@PathVariable String name, Model model) {
         // Fetch all scan sessions for the given profile
         List<ScanSession> sessions = scanHistoryService.getScansForProfile(name);
-        System.out.println(sessions);
+//        System.out.println(sessions);
 
         // Convert to list of ScanSessionSummary, sorted by most recent scan first
         List<ScanSessionSummary> summaries = sessions.stream()

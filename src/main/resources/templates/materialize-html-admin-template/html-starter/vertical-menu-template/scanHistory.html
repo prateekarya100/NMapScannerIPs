@@ -260,8 +260,8 @@
         <div class="card mb-4 p-4" style="margin-right: 1rem;">
           <h5 class="mb-3">Profiles Overview</h5>
           <div class="table-responsive">
-            <div class="card mb-4" th:each="entry : ${scanHistory}" style="margin-bottom: 1.5rem;">
-              <h3><span th:text="${entry.key}"></span></h3>
+            <div class="card mb-4" style="margin-bottom: 1.5rem;">
+<!--              <h3><span th:text="${entry.key}"></span></h3>-->
               <div class="table-responsive text-nowrap">
                 <table class="table text-center">
                   <thead>
@@ -273,9 +273,10 @@
                   </tr>
                   </thead>
                   <tbody class="table-border-bottom-0">
-                  <tr>
-                    <td>
-                      <a th:href="@{/dashboard/profile/{target}(target=${entry.key})}" class="d-inline-flex align-items-center text-decoration-none">
+                  <tr  th:each="entry : ${scanHistory}" >
+                    <td class="pl-8">
+                      <a th:href="@{/dashboard/profile/{target}(target=${entry.key})}"
+                         class="d-flex align-items-center text-decoration-none ps-2">
                         <i class="ri-router-line ri-22px text-primary me-2"></i>
                         <span class="fw-medium" th:text="${entry.key}">Profile Name</span>
                       </a>
@@ -284,15 +285,6 @@
                     <td th:text="${entry.value.size()}">0</td>
                     <td th:text="${#temporals.format(entry.value.get(entry.value.size() - 1).scanTime, 'yyyy-MM-dd HH:mm')}"></td>
 
-<!--                    <td>-->
-<!--                      <form th:action="@{/scan/rescan}" method="post">-->
-<!--                          <input type="hidden" name="profile" th:value="${entry.key}" />-->
-<!--                          <input type="hidden" name="target" th:value="${entry.key}" />-->
-<!--                          <button type="submit" class="btn btn-sm btn-primary shadow-sm px-3 py-2">-->
-<!--                            ⟲ Rescan-->
-<!--                          </button>-->
-<!--                      </form>-->
-<!--                    </td>-->
                     <td>
                       <form th:action="@{/scan/rescan}" method="post">
                         <input type="hidden" name="profile" th:value="${entry.key}" />
@@ -304,6 +296,7 @@
                       </form>
                     </td>
                   </tr>
+
                   </tbody>
                 </table>
               </div>
