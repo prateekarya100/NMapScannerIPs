@@ -29,4 +29,10 @@ public class ScanSession {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scan_data_id")
     private NMapScanData scanData;
+
+    private int openPorts;
+
+    private int closedPorts;
+
+    private int filteredPorts;
 }

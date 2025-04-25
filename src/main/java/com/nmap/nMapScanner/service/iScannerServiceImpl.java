@@ -1,7 +1,6 @@
 package com.nmap.nMapScanner.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.nmap.nMapScanner.model.NMapScanData;
 import com.nmap.nMapScanner.model.ScanSession;
 import com.nmap.nMapScanner.model.ScannedIP;
@@ -18,9 +17,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
-public class iScannerServiceImpl implements IScannerService{
+public class iScannerServiceImpl implements IScannerService {
 
     @Autowired
     private ScanSessionRepository scanSessionRepository;
@@ -36,26 +37,20 @@ public class iScannerServiceImpl implements IScannerService{
 
     @Override
     public void scanAndSave(NMapScanData nMapScanData) {
-
-        // save scan input profile
         nMapScanDataRepo.save(nMapScanData);
 
-        // Save initial session with reference to NMapScanData
         ScanSession session = new ScanSession();
         session.setTarget(nMapScanData.getTarget());
         session.setProfile(nMapScanData.getProfile());
         session.setScanTime(LocalDateTime.now());
         session.setScanType(nMapScanData.getScanType());
-        session.setScanData(nMapScanData); // Associate NMapScanData (sets scan_data_id)
+        session.setScanData(nMapScanData);
         scanSessionRepository.save(session);
 
-
-        // Build command
         String command = buildNmapCommand(nMapScanData.getTarget(), nMapScanData.getProfile());
         System.out.println("Executing Nmap command: " + command);
 
         try {
-            // Windows compatible process builder
             ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", command);
             builder.redirectErrorStream(true);
             Process process = builder.start();
@@ -75,8 +70,6 @@ public class iScannerServiceImpl implements IScannerService{
             }
 
             String output = outputBuilder.toString();
-
-            // Parse and store
             parseAndSaveOutput(output, session);
 
         } catch (IOException | InterruptedException e) {
@@ -96,10 +89,9 @@ public class iScannerServiceImpl implements IScannerService{
             case "no ping" -> "-sS -sV -T4 -A -v -Pn -p 1-1000 --reason";
             case "quick plus" -> "-sS -sV -T4 -O -F --version-light -p 1-1000 --reason -v";
             case "vulners" -> "-sV --script vulners -p 1-1000 --reason -v";
-            default -> "-sS -sV -p 1-1000 --reason -v"; // fallback
+            default -> "-sS -sV -p 1-1000 --reason -v";
         };
         return "nmap " + args + " " + target;
-
     }
 
     private void parseAndSaveOutput(String output, ScanSession session) {
@@ -111,13 +103,16 @@ public class iScannerServiceImpl implements IScannerService{
         int notShownClosedCount = 0;
         boolean isTcpScan = false;
 
-        int scanStart = 1;      // default port scan range
+        int scanStart = 1;
         int scanEnd = 1000;
+
+        int openPortCount = 0;
+        int closedPortCount = 0;
+        int filteredPortCount = 0;
 
         for (String line : lines) {
             line = line.trim();
 
-            // Detect IP
             if (line.startsWith("Nmap scan report for")) {
                 String ip = line.replace("Nmap scan report for", "").trim();
                 currentIP = scannedIPRepository.findByIpAddress(ip)
@@ -131,7 +126,6 @@ public class iScannerServiceImpl implements IScannerService{
                 knownPorts.clear();
             }
 
-            // Match open/closed/filtered ports
             else if (line.matches("^\\d+/\\w+\\s+(open|closed|filtered)(\\s+\\S+.*)?")) {
                 if (currentIP != null) {
                     String[] parts = line.split("\\s+", 5);
@@ -146,7 +140,6 @@ public class iScannerServiceImpl implements IScannerService{
                     knownPorts.add(port);
                     if ("tcp".equalsIgnoreCase(protocol)) isTcpScan = true;
 
-                    // Save to DB
                     ScannedPort scannedPort = new ScannedPort();
                     scannedPort.setPort(port);
                     scannedPort.setProtocol(protocol);
@@ -157,7 +150,6 @@ public class iScannerServiceImpl implements IScannerService{
                     scannedPort.setScanSession(session);
                     scannedPortRepository.save(scannedPort);
 
-                    // Add to JSON
                     Map<String, String> portMap = new LinkedHashMap<>();
                     portMap.put("port", String.valueOf(port));
                     portMap.put("protocol", protocol);
@@ -165,22 +157,27 @@ public class iScannerServiceImpl implements IScannerService{
                     portMap.put("service", service);
                     portMap.put("version", version);
                     jsonResultMap.get(currentIP.getIpAddress()).add(portMap);
+
+                    switch (state.toLowerCase()) {
+                        case "open" -> openPortCount++;
+                        case "closed" -> closedPortCount++;
+                        case "filtered" -> filteredPortCount++;
+                    }
                 }
             }
 
-            // Extract count of closed ports not shown
             else if (line.startsWith("Not shown:") && line.contains("closed tcp ports")) {
                 notShownClosedCount = extractClosedPortCount(line);
             }
         }
 
-        // Add implied closed ports to DB
+        // Add implied closed ports (not shown)
         if (currentIP != null && isTcpScan && notShownClosedCount > 0) {
+            int impliedClosedPorts = 0;
             for (int port = scanStart; port <= scanEnd; port++) {
                 if (!knownPorts.contains(port)) {
-                    // Save to DB
                     ScannedPort closedPort = new ScannedPort();
-                    closedPort.setPort(0);
+                    closedPort.setPort(port);
                     closedPort.setProtocol("tcp");
                     closedPort.setState("closed");
                     closedPort.setService("unknown");
@@ -189,41 +186,48 @@ public class iScannerServiceImpl implements IScannerService{
                     closedPort.setScanSession(session);
                     scannedPortRepository.save(closedPort);
 
-                    // Add to JSON
                     Map<String, String> portMap = new LinkedHashMap<>();
-                    portMap.put("port", String.valueOf(0));
+                    portMap.put("port", String.valueOf(port));
                     portMap.put("protocol", "tcp");
                     portMap.put("state", "closed");
                     portMap.put("service", "unknown");
                     portMap.put("version", "unknown");
                     jsonResultMap.get(currentIP.getIpAddress()).add(portMap);
+
+                    impliedClosedPorts++;
+                    if (impliedClosedPorts >= notShownClosedCount) break;
                 }
             }
+            closedPortCount += impliedClosedPorts;
         }
 
-        // Save final JSON
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonResultMap);
             session.setJsonResult(jsonString);
+            session.setOpenPorts(openPortCount);
+            session.setClosedPorts(closedPortCount);
+            session.setFilteredPorts(filteredPortCount);
             scanSessionRepository.save(session);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        System.out.println("Open Ports: " + openPortCount);
+        System.out.println("Closed Ports: " + closedPortCount);
+        System.out.println("Filtered Ports: " + filteredPortCount);
     }
 
     private int extractClosedPortCount(String line) {
         try {
-            String[] parts = line.split(" ");
-            for (int i = 0; i < parts.length; i++) {
-                if (parts[i].equals("Not") && parts[i + 1].equals("shown:")) {
-                    return Integer.parseInt(parts[i + 2]);
-                }
+            Pattern pattern = Pattern.compile("Not shown: (\\d+) closed tcp ports");
+            Matcher matcher = pattern.matcher(line);
+            if (matcher.find()) {
+                return Integer.parseInt(matcher.group(1));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return 0;
     }
-
 }

@@ -283,8 +283,34 @@
               <div class="tab-pane fade show active" id="summary" role="tabpanel">
                 <div class="card p-4">
                   <h5 class="mb-3">Scan Details</h5>
+
+                  <div class="d-flex" style="display: flex; gap: 6rem; margin-bottom: 1rem;">
+                    <!-- OPEN PORTS-->
+                    <div class="center-align">
+                      <i class="ri-door-open-fill ri-2x" style="color: green;"></i> <!-- Open Gate -->
+                      <span class="badge red white-text">0</span>
+                      <p class="red-text">Open Ports</p>
+                    </div>
+
+                    <!-- CLOSED PORTS-->
+                    <div class="center-align">
+                      <i class="ri-door-closed-fill ri-2x" style="color: #7986CB;"></i> <!-- Closed Gate -->
+                      <span class="badge red white-text">0</span>
+                      <p class="red-text">Closed Ports</p>
+                    </div>
+
+                    <!-- FILTERED PORTS-->
+                    <div class="center-align">
+                      <i class="ri-filter-fill ri-2x" style="color: orange;"></i> <!-- Filtered Port -->
+                      <span class="badge red white-text">0</span>
+                      <p class="red-text">Filtered Ports</p>
+                    </div>
+                  </div>
+
+
                   <!-- First Row: Critical & High -->
                   <div class="d-flex" style="display: flex; gap: 2rem; margin-bottom: 1rem;">
+
                     <div class="center-align">
                       <i class="ri-shield-star-fill ri-2x" style="color: red;"></i> <!-- Critical -->
                       <span class="badge red white-text">0</span>
@@ -295,10 +321,6 @@
                       <span class="badge orange white-text">0</span>
                       <p class="orange-text">High Vulnerabilities</p>
                     </div>
-                  </div>
-
-                  <!-- Second Row: Medium & Low -->
-                  <div class="d-flex" style="display: flex; gap: 2rem;">
                     <div class="center-align">
                       <i class="ri-shield-check-fill ri-2x" style="color: #fbc02d;"></i> <!-- Warm yellow -->
                       <span class="badge amber black-text">0</span>
@@ -312,6 +334,21 @@
                     </div>
                   </div>
 
+                  <!-- Second Row: Medium & Low -->
+<!--                  <div class="d-flex" style="display: flex; gap: 2rem;">-->
+<!--                    <div class="center-align">-->
+<!--                      <i class="ri-shield-check-fill ri-2x" style="color: #fbc02d;"></i> &lt;!&ndash; Warm yellow &ndash;&gt;-->
+<!--                      <span class="badge amber black-text">0</span>-->
+<!--                      <p class="amber-text">Medium Vulnerabilities</p>-->
+<!--                    </div>-->
+<!--                    <div class="center-align">-->
+<!--                      <i class="ri-shield-user-fill ri-2x" style="color: #8bc34a;"></i> &lt;!&ndash; Light Green (Low) &ndash;&gt;-->
+
+<!--                      <span class="badge green white-text">0</span>-->
+<!--                      <p class="green-text">Low Vulnerabilities</p>-->
+<!--                    </div>-->
+<!--                  </div>-->
+
 
                   <h5 class="mb-3">Details</h5>
                   <div class="card-panel z-depth-2" style="padding: 1.5rem; border-radius: 12px;">
@@ -320,9 +357,6 @@
                     <ul class="collection">
                       <li class="collection-item">
                         <strong>Scan Name:</strong> Advanced Network Vulnerability Scan
-                      </li>
-                      <li class="collection-item">
-                        <strong>Plugin Set ID:</strong> 1345
                       </li>
                       <li class="collection-item">
                         <strong>CVSS Score:</strong> 6.3
@@ -373,28 +407,28 @@
                           <th>Scan Type</th>
                           <th>Scan Time</th>
                           <th>Status</th>
-<!--                          <th>Actions</th>-->
                         </tr>
                         </thead>
                         <tbody class="table-border-bottom-0">
-                        <tr th:each="scan : ${scanSummaries}">
-                          <td>
-                            <i class="ri-global-line ri-22px me-2" style="color: #87CEEB;"></i>
-                            <span class="fw-medium" th:text="${scan.target}">192.168.1.1-10</span>
-                          </td>
-                          <td>
-                            <span th:text="${scan.scanType}">Quick Scan</span>
-                          </td>
-                          <td>
-                            <span th:text="${#temporals.format(scan.scanTime, 'yyyy-MM-dd HH:mm:ss')}">2025-04-22 10:40:38</span>
-                          </td>
-                          <td>
-                            <span class="badge rounded-pill bg-label-primary me-1 green">Completed</span>
-                          </td>
-                        </tr>
-                        </tbody>
+                          <tr th:each="scan : ${scanSummaries}">
+                            <td>
+                              <i class="ri-global-line ri-22px me-2" style="color: #87CEEB;"></i>
+                              <span class="fw-medium" th:text="${scan.target}">192.168.1.1-10</span>
+                            </td>
 
+                            <td>
+                              <span th:text="${scan.scanType}">Quick Scan</span>
+                            </td>
+                            <td>
+                              <span th:text="${#temporals.format(scan.scanTime, 'yyyy-MM-dd HH:mm:ss')}">2025-04-22 10:40:38</span>
+                            </td>
+                            <td>
+                              <span class="badge rounded-pill bg-label-primary me-1 green">Completed</span>
+                            </td>
+                          </tr>
+                        </tbody>
                       </table>
+
                     </div>
                   </div>
                 </div>
