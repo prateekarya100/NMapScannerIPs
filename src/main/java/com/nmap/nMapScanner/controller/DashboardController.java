@@ -43,7 +43,10 @@ public class DashboardController {
                 .map(s -> new ScanSessionSummary(
                         s.getTarget(),
                         s.getScanType(),
-                        s.getScanTime()
+                        s.getScanTime(),
+                        s.getOpenPorts(),
+                        s.getClosedPorts(),
+                        s.getFilteredPorts()
                 ))
                 .collect(Collectors.toList());
 

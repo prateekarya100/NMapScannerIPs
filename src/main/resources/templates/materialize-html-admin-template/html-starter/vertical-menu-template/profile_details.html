@@ -280,29 +280,30 @@
             <!-- Tabs Content -->
             <div class="tab-content" id="profileTabContent">
               <!-- Profile Summary -->
-              <div class="tab-pane fade show active" id="summary" role="tabpanel">
-                <div class="card p-4">
+              <div class="tab-pane fade show active" id="summary" role="tabpanel" th:if="${!scanSummaries.isEmpty()}" >
+                <div class="card p-4" >
                   <h5 class="mb-3">Scan Details</h5>
 
                   <div class="d-flex" style="display: flex; gap: 6rem; margin-bottom: 1rem;">
+
                     <!-- OPEN PORTS-->
-                    <div class="center-align">
+                    <div class="center-align" >
                       <i class="ri-door-open-fill ri-2x" style="color: green;"></i> <!-- Open Gate -->
-                      <span class="badge red white-text">0</span>
+                      <span class="badge red white-text" th:text="${scanSummaries[0].openPorts}">0</span>
                       <p class="red-text">Open Ports</p>
                     </div>
 
                     <!-- CLOSED PORTS-->
                     <div class="center-align">
                       <i class="ri-door-closed-fill ri-2x" style="color: #7986CB;"></i> <!-- Closed Gate -->
-                      <span class="badge red white-text">0</span>
+                      <span class="badge red white-text" th:text="${scanSummaries[0].closedPorts}">0</span>
                       <p class="red-text">Closed Ports</p>
                     </div>
 
                     <!-- FILTERED PORTS-->
                     <div class="center-align">
                       <i class="ri-filter-fill ri-2x" style="color: orange;"></i> <!-- Filtered Port -->
-                      <span class="badge red white-text">0</span>
+                      <span class="badge red white-text" th:text="${scanSummaries[0].filteredPorts}">0</span>
                       <p class="red-text">Filtered Ports</p>
                     </div>
                   </div>
@@ -372,9 +373,6 @@
                       </li>
                     </ul>
                   </div>
-
-                  <!--                  <p>Summary details about the profile <strong th:text="${profileName}"> Name</strong> will go here.</p>-->
-
                 </div>
               </div>
 
