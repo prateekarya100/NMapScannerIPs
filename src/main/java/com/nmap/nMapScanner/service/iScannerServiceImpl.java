@@ -1,10 +1,7 @@
 package com.nmap.nMapScanner.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nmap.nMapScanner.model.NMapScanData;
-import com.nmap.nMapScanner.model.ScanSession;
-import com.nmap.nMapScanner.model.ScannedIP;
-import com.nmap.nMapScanner.model.ScannedPort;
+import com.nmap.nMapScanner.model.*;
 import com.nmap.nMapScanner.repository.NMapScanDataRepo;
 import com.nmap.nMapScanner.repository.ScanSessionRepository;
 import com.nmap.nMapScanner.repository.ScannedIPRepository;
@@ -45,6 +42,7 @@ public class iScannerServiceImpl implements IScannerService {
         session.setScanTime(LocalDateTime.now());
         session.setScanType(nMapScanData.getScanType());
         session.setScanData(nMapScanData);
+        session.setStatus(ScanStatus.IN_PROGRESS); // 👈 Set status when starting scan
         scanSessionRepository.save(session);
 
         String command = buildNmapCommand(nMapScanData.getTarget(), nMapScanData.getProfile());
@@ -66,14 +64,23 @@ public class iScannerServiceImpl implements IScannerService {
             int exitCode = process.waitFor();
             if (exitCode != 0) {
                 System.err.println("Nmap command failed with exit code " + exitCode);
+                session.setStatus(ScanStatus.FAILED); // 👈 Mark as FAILED
+                scanSessionRepository.save(session);
                 return;
             }
 
             String output = outputBuilder.toString();
-            parseAndSaveOutput(output, session);
+            parseAndSaveOutput(output, session); // Parse will update session JSON
+
+            // After successful parsing
+            session.setStatus(ScanStatus.COMPLETED); // 👈 Mark as COMPLETED
+            scanSessionRepository.save(session);
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+            session.setStatus(ScanStatus.FAILED); // 👈 Mark as FAILED if exception
+            scanSessionRepository.save(session);
+            Thread.currentThread().interrupt(); // Good practice if InterruptedException
         }
     }
 
@@ -99,31 +106,30 @@ public class iScannerServiceImpl implements IScannerService {
         ScannedIP currentIP = null;
 
         Map<String, List<Map<String, String>>> jsonResultMap = new LinkedHashMap<>();
-        Set<Integer> knownPorts = new HashSet<>();
-        int notShownClosedCount = 0;
+        Set<Integer> detectedPorts = new HashSet<>();
         boolean isTcpScan = false;
+        int notShownClosedCount = 0;
 
         int scanStart = 1;
         int scanEnd = 1000;
 
-        int openPortCount = 0;
-        int closedPortCount = 0;
-        int filteredPortCount = 0;
+        int openPorts = 0;
+        int closedPorts = 0;
+        int filteredPorts = 0;
 
-        for (String line : lines) {
-            line = line.trim();
+        for (String rawLine : lines) {
+            String line = rawLine.trim();
 
             if (line.startsWith("Nmap scan report for")) {
-                String ip = line.replace("Nmap scan report for", "").trim();
-                currentIP = scannedIPRepository.findByIpAddress(ip)
+                String ipAddress = line.replace("Nmap scan report for", "").trim();
+                currentIP = scannedIPRepository.findByIpAddress(ipAddress)
                         .orElseGet(() -> {
                             ScannedIP newIp = new ScannedIP();
-                            newIp.setIpAddress(ip);
+                            newIp.setIpAddress(ipAddress);
                             return scannedIPRepository.save(newIp);
                         });
-
-                jsonResultMap.put(ip, new ArrayList<>());
-                knownPorts.clear();
+                jsonResultMap.put(ipAddress, new ArrayList<>());
+                detectedPorts.clear();
             }
 
             else if (line.matches("^\\d+/\\w+\\s+(open|closed|filtered)(\\s+\\S+.*)?")) {
@@ -133,11 +139,11 @@ public class iScannerServiceImpl implements IScannerService {
                     int port = Integer.parseInt(portInfo[0]);
                     String protocol = portInfo[1];
                     String state = parts[1];
-                    String service = parts.length >= 3 ? parts[2] : "unknown";
-                    String version = parts.length >= 5 ? parts[4] :
-                            (parts.length >= 4 ? parts[3] : "unknown");
+                    String service = (parts.length >= 3) ? parts[2] : "unknown";
+                    String version = (parts.length >= 5) ? parts[4] :
+                            (parts.length >= 4) ? parts[3] : "unknown";
 
-                    knownPorts.add(port);
+                    detectedPorts.add(port);
                     if ("tcp".equalsIgnoreCase(protocol)) isTcpScan = true;
 
                     ScannedPort scannedPort = new ScannedPort();
@@ -150,18 +156,18 @@ public class iScannerServiceImpl implements IScannerService {
                     scannedPort.setScanSession(session);
                     scannedPortRepository.save(scannedPort);
 
-                    Map<String, String> portMap = new LinkedHashMap<>();
-                    portMap.put("port", String.valueOf(port));
-                    portMap.put("protocol", protocol);
-                    portMap.put("state", state);
-                    portMap.put("service", service);
-                    portMap.put("version", version);
-                    jsonResultMap.get(currentIP.getIpAddress()).add(portMap);
+                    Map<String, String> portDetails = new LinkedHashMap<>();
+                    portDetails.put("port", String.valueOf(port));
+                    portDetails.put("protocol", protocol);
+                    portDetails.put("state", state);
+                    portDetails.put("service", service);
+                    portDetails.put("version", version);
+                    jsonResultMap.get(currentIP.getIpAddress()).add(portDetails);
 
                     switch (state.toLowerCase()) {
-                        case "open" -> openPortCount++;
-                        case "closed" -> closedPortCount++;
-                        case "filtered" -> filteredPortCount++;
+                        case "open" -> openPorts++;
+                        case "closed" -> closedPorts++;
+                        case "filtered" -> filteredPorts++;
                     }
                 }
             }
@@ -171,57 +177,53 @@ public class iScannerServiceImpl implements IScannerService {
             }
         }
 
-        // Add implied closed ports (not shown)
+        // Handle implied closed TCP ports
         if (currentIP != null && isTcpScan && notShownClosedCount > 0) {
-            int impliedClosedPorts = 0;
-            for (int port = scanStart; port <= scanEnd; port++) {
-                if (!knownPorts.contains(port)) {
-                    ScannedPort closedPort = new ScannedPort();
-                    closedPort.setPort(port);
-                    closedPort.setProtocol("tcp");
-                    closedPort.setState("closed");
-                    closedPort.setService("unknown");
-                    closedPort.setVersion("unknown");
-                    closedPort.setScannedIP(currentIP);
-                    closedPort.setScanSession(session);
-                    scannedPortRepository.save(closedPort);
+            int closedAdded = 0;
+            for (int port = scanStart; port <= scanEnd && closedAdded < notShownClosedCount; port++) {
+                if (!detectedPorts.contains(port)) {
+                    ScannedPort impliedClosedPort = new ScannedPort();
+                    impliedClosedPort.setPort(port);
+                    impliedClosedPort.setProtocol("tcp");
+                    impliedClosedPort.setState("closed");
+                    impliedClosedPort.setService("unknown");
+                    impliedClosedPort.setVersion("unknown");
+                    impliedClosedPort.setScannedIP(currentIP);
+                    impliedClosedPort.setScanSession(session);
+                    scannedPortRepository.save(impliedClosedPort);
 
-                    Map<String, String> portMap = new LinkedHashMap<>();
-                    portMap.put("port", String.valueOf(port));
-                    portMap.put("protocol", "tcp");
-                    portMap.put("state", "closed");
-                    portMap.put("service", "unknown");
-                    portMap.put("version", "unknown");
-                    jsonResultMap.get(currentIP.getIpAddress()).add(portMap);
+                    Map<String, String> closedPortMap = new LinkedHashMap<>();
+                    closedPortMap.put("port", String.valueOf(port));
+                    closedPortMap.put("protocol", "tcp");
+                    closedPortMap.put("state", "closed");
+                    closedPortMap.put("service", "unknown");
+                    closedPortMap.put("version", "unknown");
+                    jsonResultMap.get(currentIP.getIpAddress()).add(closedPortMap);
 
-                    impliedClosedPorts++;
-                    if (impliedClosedPorts >= notShownClosedCount) break;
+                    closedPorts++;
+                    closedAdded++;
                 }
             }
-            closedPortCount += impliedClosedPorts;
         }
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonResultMap);
             session.setJsonResult(jsonString);
-            session.setOpenPorts(openPortCount);
-            session.setClosedPorts(closedPortCount);
-            session.setFilteredPorts(filteredPortCount);
+            session.setOpenPorts(openPorts);
+            session.setClosedPorts(closedPorts);
+            session.setFilteredPorts(filteredPorts);
             scanSessionRepository.save(session);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        System.out.println("Open Ports: " + openPortCount);
-        System.out.println("Closed Ports: " + closedPortCount);
-        System.out.println("Filtered Ports: " + filteredPortCount);
+        System.out.println("Summary: Open=" + openPorts + ", Closed=" + closedPorts + ", Filtered=" + filteredPorts);
     }
 
     private int extractClosedPortCount(String line) {
         try {
-            Pattern pattern = Pattern.compile("Not shown: (\\d+) closed tcp ports");
-            Matcher matcher = pattern.matcher(line);
+            Matcher matcher = Pattern.compile("Not shown: (\\d+) closed tcp ports").matcher(line);
             if (matcher.find()) {
                 return Integer.parseInt(matcher.group(1));
             }

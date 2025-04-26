@@ -81,5 +81,4 @@ public class ScanController {
         return "redirect:/dashboard/profiles";
     }
 
-
 }

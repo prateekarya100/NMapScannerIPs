@@ -49,4 +49,19 @@ public class ScanHistoryService {
     public Optional<ScanSession> getScanById(Long id) {
         return scanSessionRepository.findById(id);
     }
+
+    public void restartScan(String profile, String target) {
+        // Perform the scan logic synchronously here
+        try {
+            // Example: Your scanning logic (e.g., Nmap command or other scanning process)
+            System.out.println("Starting scan for profile: " + profile + " and target: " + target);
+            // Simulate scan work
+            Thread.sleep(5000); // Example of a scan running for 5 seconds
+            // Once completed, save the results, etc.
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }

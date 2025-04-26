@@ -380,7 +380,38 @@
               <div class="tab-pane fade" id="host" role="tabpanel">
                 <div class="card p-4">
                   <h5 class="mb-3">Scanned Hosts</h5>
-                  <p>List of scanned hosts will appear here. (You can enhance this section with host-specific details.)</p>
+<!--                  <p>List of scanned hosts will appear here. (You can enhance this section with host-specific details.)</p>-->
+
+                  <div class="table-responsive text-nowrap">
+                    <table class="table">
+                      <thead>
+                      <tr>
+                        <th>Target IP</th>
+                        <th>Scan Type</th>
+                        <th>Scan Time</th>
+                        <th>Status</th>
+                      </tr>
+                      </thead>
+                      <tbody class="table-border-bottom-0">
+                      <tr th:each="scan : ${scanSummaries}">
+                        <td>
+                          <i class="ri-global-line ri-22px me-2" style="color: #87CEEB;"></i>
+                          <span class="fw-medium" th:text="${scan.target}">192.168.1.1-10</span>
+                        </td>
+
+                        <td>
+                          <span th:text="${scan.scanType}">Quick Scan</span>
+                        </td>
+                        <td>
+                          <span th:text="${#temporals.format(scan.scanTime, 'yyyy-MM-dd HH:mm:ss')}">2025-04-22 10:40:38</span>
+                        </td>
+                        <td>
+                          <span class="badge rounded-pill bg-label-primary me-1 green">Completed</span>
+                        </td>
+                      </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
 
@@ -426,7 +457,6 @@
                           </tr>
                         </tbody>
                       </table>
-
                     </div>
                   </div>
                 </div>
