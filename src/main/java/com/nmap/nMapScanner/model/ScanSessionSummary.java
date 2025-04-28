@@ -16,5 +16,4 @@ public class ScanSessionSummary {
     private int openPorts;
     private int closedPorts;
     private int filteredPorts;
-//    private String resultJson;
 }

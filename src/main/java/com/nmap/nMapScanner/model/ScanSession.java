@@ -36,11 +36,4 @@ public class ScanSession {
 
     private int filteredPorts;
 
-    @Enumerated(EnumType.STRING)
-    private ScanStatus status;
-
-    @Column(nullable = false)
-    private Integer progress = 0; // Default 0%
-
-
 }

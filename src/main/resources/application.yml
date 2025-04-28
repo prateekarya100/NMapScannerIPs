@@ -18,15 +18,15 @@ spring:
       ddl-auto: update
     show-sql: true
 
-  security:
-    user:
-      name: tomcatdev
-      password: admin
+#  security:
+#    user:
+#      name: tomcatdev
+#      password: admin
 
 
   thymeleaf:
-    prefix: classpath:/templates/materialize-html-admin-template/html-starter/vertical-menu-template/
 #    prefix: classpath:/templates/materialize-html-admin-template/html-starter/vertical-menu-template/
+    prefix: classpath:/templates/materialize-html-admin-template/html-starter/vertical-menu-template/
     suffix: .html
     mode: HTML
     cache: false

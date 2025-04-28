@@ -54,7 +54,7 @@
   <script src="../../assets/js/config.js"></script>
 </head>
 
-<body>
+<tbody>
 <!-- Layout wrapper -->
 <div class="layout-wrapper layout-content-navbar">
   <div class="layout-container">
@@ -259,53 +259,56 @@
         <!-- Content -->
         <div class="card mb-4 p-4" style="margin-right: 1rem;">
           <h5 class="mb-3">Profiles Overview</h5>
-          <div class="table-responsive">
-            <div class="card mb-4" style="margin-bottom: 1.5rem;">
-<!--              <h3><span th:text="${entry.key}"></span></h3>-->
-              <div class="table-responsive text-nowrap">
-                <table class="table text-center">
-                  <thead>
-                  <tr>
-                    <th>Profile Name</th>
-                    <th>Total Scans</th>
-                    <th>Last Scan</th>
-                    <th>Action</th>
-                  </tr>
-                  </thead>
-                  <tbody class="table-border-bottom-0">
-                  <tr  th:each="entry : ${scanHistory}" >
-                    <td class="pl-8">
-                      <a th:href="@{/dashboard/profile/{target}(target=${entry.key})}"
-                         class="d-flex align-items-center text-decoration-none ps-2">
-                        <i class="ri-router-line ri-22px text-primary me-2"></i>
-                        <span class="fw-medium" th:text="${entry.key}">Profile Name</span>
-                      </a>
-                    </td>
 
-                    <td th:text="${entry.value.size()}">0</td>
-                    <td th:text="${#temporals.format(entry.value.get(entry.value.size() - 1).scanTime, 'yyyy-MM-dd HH:mm')}"></td>
+          <div class="table-responsive text-nowrap">
+            <table class="table text-center">
+              <thead>
+              <tr>
+                <th>Profile Name</th>
+                <th>Total Scans</th>
+                <th>Last Scan</th>
+                <th>Action</th>
+              </tr>
+              </thead>
+              <tbody class="table-border-bottom-0">
+              <tr th:each="entry : ${scanHistory}">
+                <!-- Profile Name with link -->
+                <td class="pl-8">
+                  <a th:href="@{/dashboard/profile/{target}(target=${entry.key})}"
+                     class="d-flex align-items-center text-decoration-none ps-2">
+                    <i class="ri-router-line ri-22px text-primary me-2"></i>
+                    <span class="fw-medium" th:text="${entry.key}">Profile Name</span>
+                  </a>
+                </td>
 
-                    <td>
-                      <form th:action="@{/scan/rescan}" method="post">
-                        <input type="hidden" name="profile" th:value="${entry.key}" />
-                        <input type="hidden" name="target" th:value="${entry.key}" />
-                        <button type="submit" class="btn btn-sm btn-primary shadow-sm px-3 py-2"
-                                style="border: none; border-radius: 0; margin-top: 0;">
-                          ⟲ Rescan
-                        </button>
-                      </form>
-                    </td>
-                  </tr>
+                <!-- Total Scans -->
+                <td th:text="${entry.value.size()}">0</td>
 
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                <!-- Last Scan -->
+                <td th:text="${entry.value.isEmpty() ? 'No Scans' : #temporals.format(entry.value.get(entry.value.size() - 1).scanTime, 'yyyy-MM-dd HH:mm')}"></td>
+
+                <!-- Action Button -->
+                <td>
+                  <form th:action="@{/scan/rescan}" method="post">
+                    <input type="hidden" name="profile" th:value="${entry.key}" />
+                    <input type="hidden" name="target" th:value="${entry.key}" />
+                    <button type="submit" class="btn btn-sm btn-primary shadow-sm px-3 py-2"
+                            style="border: none; border-radius: 0; margin-top: 0;">
+                      ⟲ Rescan
+                    </button>
+                  </form>
+                </td>
+
+              </tr>
+              </tbody>
+            </table>
           </div>
+
         </div>
 
         <div class="content-backdrop fade"></div>
       </div>
+
       <!-- Content wrapper -->
     </div>
     <!-- / Layout page -->
