@@ -52,6 +52,9 @@
   <script src="../../assets/vendor/js/template-customizer.js"></script>
   <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
   <script src="../../assets/js/config.js"></script>
+  <!-- Remix Icon CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
 </head>
 
 <body>
@@ -280,33 +283,84 @@
             <!-- Tabs Content -->
             <div class="tab-content" id="profileTabContent">
               <!-- Profile Summary -->
-              <div class="tab-pane fade show active" id="summary" role="tabpanel" th:if="${!scanSummaries.isEmpty()}" >
-                <div class="card p-4" >
+              <div class="tab-pane fade show active" id="summary" role="tabpanel" th:if="${!scanSummaries.isEmpty()}">
+                <div class="card p-4">
                   <h5 class="mb-3">Scan Details</h5>
 
-                  <div class="d-flex" style="display: flex; gap: 6rem; margin-bottom: 1rem;">
+                  <!-- ICON PORTS STARTED -->
+                  <div class="row center-align" style="margin-top: 2rem;">
 
-                    <!-- OPEN PORTS-->
-                    <div class="center-align" >
-                      <i class="ri-door-open-fill ri-2x" style="color: green;"></i> <!-- Open Gate -->
-                      <span class="badge red white-text" th:text="${scanSummaries[0].openPorts}">0</span>
-                      <p class="red-text">Open Ports</p>
+                    <!-- OPEN PORTS -->
+                    <div class="col s6 m2">
+                      <i class="ri-door-open-fill ri-2x" style="color: #4caf50;"></i>
+                      <span class="badge green white-text" th:text="${scanSummaries[0].openPorts}">0</span>
+                      <p class="green-text">Open Ports</p>
                     </div>
 
-                    <!-- CLOSED PORTS-->
-                    <div class="center-align">
-                      <i class="ri-door-closed-fill ri-2x" style="color: #7986CB;"></i> <!-- Closed Gate -->
-                      <span class="badge red white-text" th:text="${scanSummaries[0].closedPorts}">0</span>
-                      <p class="red-text">Closed Ports</p>
+                    <!-- CLOSED PORTS -->
+                    <div class="col s6 m2">
+                      <i class="ri-door-closed-fill ri-2x" style="color: #5c6bc0;"></i>
+                      <span class="badge indigo white-text" th:text="${scanSummaries[0].closedPorts}">0</span>
+                      <p class="indigo-text">Closed Ports</p>
                     </div>
 
-                    <!-- FILTERED PORTS-->
-                    <div class="center-align">
-                      <i class="ri-filter-fill ri-2x" style="color: orange;"></i> <!-- Filtered Port -->
-                      <span class="badge red white-text" th:text="${scanSummaries[0].filteredPorts}">0</span>
-                      <p class="red-text">Filtered Ports</p>
+                    <!-- FILTERED PORTS -->
+                    <div class="col s6 m2">
+                      <i class="ri-filter-3-fill ri-2x" style="color: #fb8c00;"></i>
+                      <span class="badge orange darken-2 white-text" th:text="${scanSummaries[0].filteredPorts}">0</span>
+                      <p class="orange-text text-darken-2">Filtered Ports</p>
+                    </div>
+
+                    <!-- HOSTS UP -->
+                    <div class="col s6 m2">
+                      <i class="ri-wifi-fill ri-2x" style="color: #43a047;"></i>
+                      <!-- Dynamically bind hostUpCount from the model -->
+                      <span class="badge green white-text" th:text="${hostUpCount}">  0</span>
+                      <p class="green-text">Hosts UP</p>
+                    </div>
+
+                    <!-- HOSTS DOWN -->
+                    <div class="col s6 m2">
+                      <i class="ri-signal-wifi-off-fill ri-2x" style="color: #e53935;"></i>
+                      <!-- Dynamically bind hostDownCount from the model -->
+                      <span class="badge red white-text" th:text="${hostDownCount}">0</span>
+                      <p class="red-text">Hosts DOWN</p>
                     </div>
                   </div>
+
+
+
+              <!--                    &lt;!&ndash; OPEN PORTS&ndash;&gt;-->
+<!--                    <div class="center-align" >-->
+<!--                      <i class="ri-door-open-fill ri-2x" style="color: green;"></i> &lt;!&ndash; Open Gate &ndash;&gt;-->
+<!--                      <span class="badge red white-text" th:text="${scanSummaries[0].openPorts}">0</span>-->
+<!--                      <p class="red-text">Open Ports</p>-->
+<!--                    </div>-->
+
+<!--                    &lt;!&ndash; CLOSED PORTS&ndash;&gt;-->
+<!--                    <div class="center-align">-->
+<!--                      <i class="ri-door-closed-fill ri-2x" style="color: #7986CB;"></i> &lt;!&ndash; Closed Gate &ndash;&gt;-->
+<!--                      <span class="badge red white-text" th:text="${scanSummaries[0].closedPorts}">0</span>-->
+<!--                      <p class="red-text">Closed Ports</p>-->
+<!--                    </div>-->
+
+<!--                    &lt;!&ndash; Host UP &ndash;&gt;-->
+<!--                    <div class="col s12 m4">-->
+<!--                      <div class="card-panel hoverable z-depth-2">-->
+<!--                        <i class="ri-wifi-fill ri-3x" style="color: #43a047;"></i>-->
+<!--                        <h6 class="green-text">Hosts UP</h6>-->
+<!--                        <span class="new badge green white-text" data-badge-caption="Online">5</span>-->
+<!--                      </div>-->
+<!--                    </div>-->
+
+<!--                    &lt;!&ndash; Host DOWN &ndash;&gt;-->
+<!--                    <div class="col s12 m4">-->
+<!--                      <div class="card-panel hoverable z-depth-2">-->
+<!--                        <i class="ri-signal-wifi-off-fill ri-3x" style="color: #e53935;"></i>-->
+<!--                        <h6 class="red-text">Hosts DOWN</h6>-->
+<!--                        <span class="new badge red white-text" data-badge-caption="Offline">2</span>-->
+<!--                      </div>-->
+<!--                    </div>-->
 
 
                   <!-- First Row: Critical & High -->
@@ -386,29 +440,29 @@
                     <table class="table">
                       <thead>
                       <tr>
-                        <th>Target IP</th>
-                        <th>Scan Type</th>
-                        <th>Scan Time</th>
-                        <th>Status</th>
+                        <th>Host</th>
+                        <th>Vulnerabilities</th>
+<!--                        <th>Scan Time</th>-->
+<!--                        <th>Status</th>-->
                       </tr>
                       </thead>
                       <tbody class="table-border-bottom-0">
-                      <tr th:each="scan : ${scanSummaries}">
-                        <td>
-                          <i class="ri-global-line ri-22px me-2" style="color: #87CEEB;"></i>
-                          <span class="fw-medium" th:text="${scan.target}">192.168.1.1-10</span>
-                        </td>
+                            <tr th:each="scan : ${scanSummaries}">
+                              <td>
+                                <i class="ri-global-line ri-22px me-2" style="color: #87CEEB;"></i>
+                                <span class="fw-medium" th:text="${scan.target}">192.168.1.1-10</span>
+                              </td>
 
-                        <td>
-                          <span th:text="${scan.scanType}">Quick Scan</span>
-                        </td>
-                        <td>
-                          <span th:text="${#temporals.format(scan.scanTime, 'yyyy-MM-dd HH:mm:ss')}">2025-04-22 10:40:38</span>
-                        </td>
-                        <td>
-                          <span class="badge rounded-pill bg-label-primary me-1 green">Completed</span>
-                        </td>
-                      </tr>
+                              <td>
+                                <span th:text="${scan.scanType}">Quick Scan</span>
+                              </td>
+                              <td>
+                                <span th:text="${#temporals.format(scan.scanTime, 'yyyy-MM-dd HH:mm:ss')}">2025-04-22 10:40:38</span>
+                              </td>
+                              <td>
+                                <span class="badge rounded-pill bg-label-primary me-1 green">Completed</span>
+                              </td>
+                            </tr>
                       </tbody>
                     </table>
                   </div>

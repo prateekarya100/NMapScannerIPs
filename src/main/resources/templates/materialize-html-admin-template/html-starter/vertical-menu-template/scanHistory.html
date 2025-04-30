@@ -271,6 +271,15 @@
               </tr>
               </thead>
               <tbody class="table-border-bottom-0">
+
+              <!-- Show message if scanHistory is empty -->
+              <tr th:if="${#lists.isEmpty(scanHistory)}">
+                <td colspan="4" class="text-muted text-center py-4">
+                  <i class="ri-information-line me-2"></i> No scans found yet.
+                </td>
+              </tr>
+
+              <!-- Iterate over scanHistory if not empty -->
               <tr th:each="entry : ${scanHistory}">
                 <!-- Profile Name with link -->
                 <td class="pl-8">
@@ -282,10 +291,12 @@
                 </td>
 
                 <!-- Total Scans -->
-                <td th:text="${entry.value.size()}">0</td>
+                <td th:text="${entry.value == null ? '0' : entry.value.size()}">0</td>
 
                 <!-- Last Scan -->
-                <td th:text="${entry.value.isEmpty() ? 'No Scans' : #temporals.format(entry.value.get(entry.value.size() - 1).scanTime, 'yyyy-MM-dd HH:mm')}"></td>
+                <td th:text="${entry.value == null or entry.value.isEmpty() ? 'No Scan Done Yet' : #temporals.format(entry.value.get(entry.value.size() - 1).scanTime, 'yyyy-MM-dd HH:mm')}">
+                  No Scan Done Yet
+                </td>
 
                 <!-- Action Button -->
                 <td>
@@ -298,12 +309,10 @@
                     </button>
                   </form>
                 </td>
-
               </tr>
               </tbody>
             </table>
           </div>
-
         </div>
 
         <div class="content-backdrop fade"></div>

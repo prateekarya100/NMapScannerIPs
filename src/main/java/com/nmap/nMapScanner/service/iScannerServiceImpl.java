@@ -77,6 +77,23 @@ public class iScannerServiceImpl implements IScannerService {
         }
     }
 
+    @Override
+    public List<ScannedIP> getUpHostsBySessionId(Long sessionId) {
+        Optional<ScanSession> sessionOpt = scanSessionRepository.findById(sessionId);
+        return sessionOpt.map(session ->
+                scannedIPRepository.findByScanSessionAndStatus(session, "UP")
+        ).orElse(Collections.emptyList());
+    }
+
+    @Override
+    public List<ScannedIP> getDownHostsBySessionId(Long sessionId) {
+        Optional<ScanSession> sessionOpt = scanSessionRepository.findById(sessionId);
+        return sessionOpt.map(session ->
+                scannedIPRepository.findByScanSessionAndStatus(session, "DOWN")
+        ).orElse(Collections.emptyList());
+    }
+
+
     private String buildNmapCommand(String target, String profile) {
         String args = switch (profile.toLowerCase()) {
             case "ping scan" -> "-sV -sn -p 1-1000";
@@ -110,22 +127,31 @@ public class iScannerServiceImpl implements IScannerService {
         int closedPortCount = 0;
         int filteredPortCount = 0;
 
+        Set<String> allIPsSeen = new LinkedHashSet<>();
+        Set<String> upIPs = new HashSet<>();
+
         for (String line : lines) {
             line = line.trim();
 
             if (line.startsWith("Nmap scan report for")) {
                 String ip = line.replace("Nmap scan report for", "").trim();
+                allIPsSeen.add(ip);
+
                 currentIP = scannedIPRepository.findByIpAddress(ip)
                         .orElseGet(() -> {
                             ScannedIP newIp = new ScannedIP();
                             newIp.setIpAddress(ip);
-                            return scannedIPRepository.save(newIp);
+                            return newIp;
                         });
 
+                currentIP.setStatus("UP");
+                currentIP.setScanSession(session);
+                scannedIPRepository.save(currentIP);
+
+                upIPs.add(ip);
                 jsonResultMap.put(ip, new ArrayList<>());
                 knownPorts.clear();
             }
-
             else if (line.matches("^\\d+/\\w+\\s+(open|closed|filtered)(\\s+\\S+.*)?")) {
                 if (currentIP != null) {
                     String[] parts = line.split("\\s+", 5);
@@ -159,19 +185,44 @@ public class iScannerServiceImpl implements IScannerService {
                     jsonResultMap.get(currentIP.getIpAddress()).add(portMap);
 
                     switch (state.toLowerCase()) {
-                        case "open" -> openPortCount++;
-                        case "closed" -> closedPortCount++;
-                        case "filtered" -> filteredPortCount++;
+                        case "open":
+                            openPortCount++;
+                            break;
+                        case "closed":
+                            closedPortCount++;
+                            break;
+                        case "filtered":
+                            filteredPortCount++;
+                            break;
+                        case "open|filtered":
+                            openPortCount++; // Handle open|filtered as open
+                            break;
                     }
                 }
             }
-
             else if (line.startsWith("Not shown:") && line.contains("closed tcp ports")) {
                 notShownClosedCount = extractClosedPortCount(line);
             }
         }
 
-        // Add implied closed ports (not shown)
+        // Handle DOWN IPs (those seen but not marked as UP)
+        Set<String> downIPs = new HashSet<>(allIPsSeen);
+        downIPs.removeAll(upIPs);
+
+        for (String downIp : downIPs) {
+            ScannedIP down = scannedIPRepository.findByIpAddress(downIp)
+                    .orElseGet(() -> {
+                        ScannedIP newIp = new ScannedIP();
+                        newIp.setIpAddress(downIp);
+                        return newIp;
+                    });
+
+            down.setStatus("DOWN");
+            down.setScanSession(session);
+            scannedIPRepository.save(down);
+        }
+
+        // Add implied closed ports
         if (currentIP != null && isTcpScan && notShownClosedCount > 0) {
             int impliedClosedPorts = 0;
             for (int port = scanStart; port <= scanEnd; port++) {
@@ -201,6 +252,7 @@ public class iScannerServiceImpl implements IScannerService {
             closedPortCount += impliedClosedPorts;
         }
 
+        // Save the session with updated counts
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonResultMap);
@@ -213,10 +265,29 @@ public class iScannerServiceImpl implements IScannerService {
             e.printStackTrace();
         }
 
+        // Final log for debugging
         System.out.println("Open Ports: " + openPortCount);
         System.out.println("Closed Ports: " + closedPortCount);
         System.out.println("Filtered Ports: " + filteredPortCount);
+        System.out.println("Total IPs scanned: " + allIPsSeen.size());
+        System.out.println("UP IPs: " + upIPs.size());
+        System.out.println("DOWN IPs: " + downIPs.size());
     }
+
+    // Add this method to return the counts of UP and DOWN IPs
+    public Map<String, Integer> getIPStatusCounts(Long sessionId) {
+        // Fetch the UP and DOWN IPs
+        List<ScannedIP> upIps = getUpHostsBySessionId(sessionId);
+        List<ScannedIP> downIps = getDownHostsBySessionId(sessionId);
+
+        // Prepare a map to return the counts of UP and DOWN IPs
+        Map<String, Integer> statusCounts = new HashMap<>();
+        statusCounts.put("up", upIps.size());
+        statusCounts.put("down", downIps.size());
+
+        return statusCounts;
+    }
+
 
     private int extractClosedPortCount(String line) {
         try {

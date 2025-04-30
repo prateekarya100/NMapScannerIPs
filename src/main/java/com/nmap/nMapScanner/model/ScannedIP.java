@@ -16,17 +16,18 @@ import java.util.List;
 @NoArgsConstructor
 public class ScannedIP {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String ipAddress;
 
-//    @ManyToOne
-//    @JoinColumn(name = "scan_session_id")
-//    private ScanSession scanSession;
+    private String status; // "UP", "DOWN", etc.
 
-    @OneToMany(mappedBy = "scannedIP", cascade = CascadeType.ALL,orphanRemoval = true)
+    @ManyToOne
+    @JoinColumn(name = "scan_session_id")
+    private ScanSession scanSession;
+
+    @OneToMany(mappedBy = "scannedIP", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ScannedPort> ports = new ArrayList<>();
 }
