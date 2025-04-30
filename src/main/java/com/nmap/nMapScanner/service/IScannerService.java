@@ -12,8 +12,4 @@ public interface IScannerService {
     @Async
     void scanAndSave(NMapScanData nMapScanData);
 
-    List<ScannedIP> getUpHostsBySessionId(Long sessionId);
-    List<ScannedIP> getDownHostsBySessionId(Long sessionId);
-
-    Map<String, Integer> getIPStatusCounts(Long sessionId);
 }

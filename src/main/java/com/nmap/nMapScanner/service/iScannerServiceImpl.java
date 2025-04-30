@@ -77,22 +77,6 @@ public class iScannerServiceImpl implements IScannerService {
         }
     }
 
-    @Override
-    public List<ScannedIP> getUpHostsBySessionId(Long sessionId) {
-        Optional<ScanSession> sessionOpt = scanSessionRepository.findById(sessionId);
-        return sessionOpt.map(session ->
-                scannedIPRepository.findByScanSessionAndStatus(session, "UP")
-        ).orElse(Collections.emptyList());
-    }
-
-    @Override
-    public List<ScannedIP> getDownHostsBySessionId(Long sessionId) {
-        Optional<ScanSession> sessionOpt = scanSessionRepository.findById(sessionId);
-        return sessionOpt.map(session ->
-                scannedIPRepository.findByScanSessionAndStatus(session, "DOWN")
-        ).orElse(Collections.emptyList());
-    }
-
 
     private String buildNmapCommand(String target, String profile) {
         String args = switch (profile.toLowerCase()) {
@@ -272,20 +256,6 @@ public class iScannerServiceImpl implements IScannerService {
         System.out.println("Total IPs scanned: " + allIPsSeen.size());
         System.out.println("UP IPs: " + upIPs.size());
         System.out.println("DOWN IPs: " + downIPs.size());
-    }
-
-    // Add this method to return the counts of UP and DOWN IPs
-    public Map<String, Integer> getIPStatusCounts(Long sessionId) {
-        // Fetch the UP and DOWN IPs
-        List<ScannedIP> upIps = getUpHostsBySessionId(sessionId);
-        List<ScannedIP> downIps = getDownHostsBySessionId(sessionId);
-
-        // Prepare a map to return the counts of UP and DOWN IPs
-        Map<String, Integer> statusCounts = new HashMap<>();
-        statusCounts.put("up", upIps.size());
-        statusCounts.put("down", downIps.size());
-
-        return statusCounts;
     }
 
 

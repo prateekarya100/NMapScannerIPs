@@ -11,8 +11,6 @@ import java.util.List;
 @Repository
 public interface ScanSessionRepository extends JpaRepository<ScanSession,Long> {
 
-    //    filter multiple scans based on profile
-//    List<ScanSession> findAllByOrderByScanTimeDesc();
     List<ScanSession> findByProfileIgnoreCase(String profile);
 
 }

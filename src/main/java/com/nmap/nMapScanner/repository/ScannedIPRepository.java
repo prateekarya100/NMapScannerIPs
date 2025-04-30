@@ -12,8 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface ScannedIPRepository extends JpaRepository<ScannedIP, Long> {
-    Optional<ScannedIP> findByIpAddress(String ip);
 
-    List<ScannedIP> findByScanSessionAndStatus(ScanSession session, String status);
+    Optional<ScannedIP> findByIpAddress(String ip);
 
 }

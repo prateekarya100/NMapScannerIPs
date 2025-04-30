@@ -18,9 +18,6 @@ public class ScanSession {
 
     private LocalDateTime scanTime;
 
-//    @OneToMany(mappedBy = "scanSession", cascade = CascadeType.ALL,orphanRemoval = true)
-//    private List<ScannedIP> scannedIPs = new ArrayList<>();
-
     @Lob
     private String jsonResult;
 

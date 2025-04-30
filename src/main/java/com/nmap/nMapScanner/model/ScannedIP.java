@@ -15,14 +15,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ScannedIP {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String ipAddress;
-
-    private String status; // "UP", "DOWN", etc.
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "scan_session_id")
