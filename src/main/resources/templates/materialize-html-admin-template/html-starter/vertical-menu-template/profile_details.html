@@ -315,7 +315,7 @@
                     <div class="col s6 m2">
                       <i class="ri-wifi-fill ri-2x" style="color: #43a047;"></i>
                       <!-- Dynamically bind hostUpCount from the model -->
-                      <span class="badge green white-text" th:text="${hostUpCount}">  0</span>
+                      <span class="badge green white-text" th:text="${upCount}">0</span>
                       <p class="green-text">Hosts UP</p>
                     </div>
 
@@ -323,45 +323,10 @@
                     <div class="col s6 m2">
                       <i class="ri-signal-wifi-off-fill ri-2x" style="color: #e53935;"></i>
                       <!-- Dynamically bind hostDownCount from the model -->
-                      <span class="badge red white-text" th:text="${hostDownCount}">0</span>
+                      <span class="badge red white-text" th:text="${downCount}">0</span>
                       <p class="red-text">Hosts DOWN</p>
                     </div>
                   </div>
-
-
-
-              <!--                    &lt;!&ndash; OPEN PORTS&ndash;&gt;-->
-<!--                    <div class="center-align" >-->
-<!--                      <i class="ri-door-open-fill ri-2x" style="color: green;"></i> &lt;!&ndash; Open Gate &ndash;&gt;-->
-<!--                      <span class="badge red white-text" th:text="${scanSummaries[0].openPorts}">0</span>-->
-<!--                      <p class="red-text">Open Ports</p>-->
-<!--                    </div>-->
-
-<!--                    &lt;!&ndash; CLOSED PORTS&ndash;&gt;-->
-<!--                    <div class="center-align">-->
-<!--                      <i class="ri-door-closed-fill ri-2x" style="color: #7986CB;"></i> &lt;!&ndash; Closed Gate &ndash;&gt;-->
-<!--                      <span class="badge red white-text" th:text="${scanSummaries[0].closedPorts}">0</span>-->
-<!--                      <p class="red-text">Closed Ports</p>-->
-<!--                    </div>-->
-
-<!--                    &lt;!&ndash; Host UP &ndash;&gt;-->
-<!--                    <div class="col s12 m4">-->
-<!--                      <div class="card-panel hoverable z-depth-2">-->
-<!--                        <i class="ri-wifi-fill ri-3x" style="color: #43a047;"></i>-->
-<!--                        <h6 class="green-text">Hosts UP</h6>-->
-<!--                        <span class="new badge green white-text" data-badge-caption="Online">5</span>-->
-<!--                      </div>-->
-<!--                    </div>-->
-
-<!--                    &lt;!&ndash; Host DOWN &ndash;&gt;-->
-<!--                    <div class="col s12 m4">-->
-<!--                      <div class="card-panel hoverable z-depth-2">-->
-<!--                        <i class="ri-signal-wifi-off-fill ri-3x" style="color: #e53935;"></i>-->
-<!--                        <h6 class="red-text">Hosts DOWN</h6>-->
-<!--                        <span class="new badge red white-text" data-badge-caption="Offline">2</span>-->
-<!--                      </div>-->
-<!--                    </div>-->
-
 
                   <!-- First Row: Critical & High -->
                   <div class="d-flex" style="display: flex; gap: 2rem; margin-bottom: 1rem;">
@@ -388,22 +353,6 @@
                       <p class="green-text">Low Vulnerabilities</p>
                     </div>
                   </div>
-
-                  <!-- Second Row: Medium & Low -->
-<!--                  <div class="d-flex" style="display: flex; gap: 2rem;">-->
-<!--                    <div class="center-align">-->
-<!--                      <i class="ri-shield-check-fill ri-2x" style="color: #fbc02d;"></i> &lt;!&ndash; Warm yellow &ndash;&gt;-->
-<!--                      <span class="badge amber black-text">0</span>-->
-<!--                      <p class="amber-text">Medium Vulnerabilities</p>-->
-<!--                    </div>-->
-<!--                    <div class="center-align">-->
-<!--                      <i class="ri-shield-user-fill ri-2x" style="color: #8bc34a;"></i> &lt;!&ndash; Light Green (Low) &ndash;&gt;-->
-
-<!--                      <span class="badge green white-text">0</span>-->
-<!--                      <p class="green-text">Low Vulnerabilities</p>-->
-<!--                    </div>-->
-<!--                  </div>-->
-
 
                   <h5 class="mb-3">Details</h5>
                   <div class="card-panel z-depth-2" style="padding: 1.5rem; border-radius: 12px;">
@@ -442,8 +391,6 @@
                       <tr>
                         <th>Host</th>
                         <th>Vulnerabilities</th>
-<!--                        <th>Scan Time</th>-->
-<!--                        <th>Status</th>-->
                       </tr>
                       </thead>
                       <tbody class="table-border-bottom-0">

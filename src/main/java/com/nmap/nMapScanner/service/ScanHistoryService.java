@@ -1,7 +1,9 @@
 package com.nmap.nMapScanner.service;
 
 import com.nmap.nMapScanner.model.ScanSession;
+import com.nmap.nMapScanner.model.ScannedIP;
 import com.nmap.nMapScanner.repository.ScanSessionRepository;
+import com.nmap.nMapScanner.repository.ScannedIPRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,9 @@ public class ScanHistoryService {
 
     @Autowired
     private ScanSessionRepository scanSessionRepository;
+
+    @Autowired
+    private ScannedIPRepository scannedIPRepository;
 
     // ✅ Get all scan sessions grouped by profile name (latest first)
     public Map<String, List<ScanSession>> getScanHistoryGroupedByProfile() {
@@ -32,35 +37,33 @@ public class ScanHistoryService {
         return scanSessionRepository.findByProfileIgnoreCase(profileName);
     }
 
-//    // ✅ Get the most recent scan session (across all profiles)
-//    public Optional<ScanSession> getLatestScan() {
-//        return scanSessionRepository.findAllByOrderByScanTimeDesc()
-//                .stream().findFirst();
-//    }
+    public Map<Long, Map<String, Object>> getScanSummaries(List<ScanSession> sessions) {
+        Map<Long, Map<String, Object>> result = new HashMap<>();
 
-    // ✅ Get the most recent scan for a specific profile
-    public Optional<ScanSession> getLatestScanForProfile(String profileName) {
-        return scanSessionRepository.findByProfileIgnoreCase(profileName)
-                .stream()
-                .max(Comparator.comparing(ScanSession::getScanTime));
-    }
+        for (ScanSession session : sessions) {
+            Long sessionId = session.getId();
 
-    // ✅ Get scan session by ID
-    public Optional<ScanSession> getScanById(Long id) {
-        return scanSessionRepository.findById(id);
-    }
+            int open = session.getOpenPorts();
+            int closed = session.getClosedPorts();
+            int filtered = session.getFilteredPorts();
 
-    public void restartScan(String profile, String target) {
-        // Perform the scan logic synchronously here
-        try {
-            // Example: Your scanning logic (e.g., Nmap command or other scanning process)
-            System.out.println("Starting scan for profile: " + profile + " and target: " + target);
-            // Simulate scan work
-            Thread.sleep(5000); // Example of a scan running for 5 seconds
-            // Once completed, save the results, etc.
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            List<ScannedIP> scannedIPs = scannedIPRepository.findByScanSession(session);
+            long upCount = scannedIPs.stream().filter(ip -> "UP".equalsIgnoreCase(ip.getStatus())).count();
+            long downCount = scannedIPs.stream().filter(ip -> "DOWN".equalsIgnoreCase(ip.getStatus())).count();
+
+            Map<String, Object> summary = new HashMap<>();
+            summary.put("openPorts", open);
+            summary.put("closedPorts", closed);
+            summary.put("filteredPorts", filtered);
+            summary.put("totalIPsScanned", scannedIPs.size());
+            summary.put("upIPs", upCount);
+            summary.put("downIPs", downCount);
+
+            result.put(sessionId, summary);
         }
+
+        return result;
     }
+
 
 }
