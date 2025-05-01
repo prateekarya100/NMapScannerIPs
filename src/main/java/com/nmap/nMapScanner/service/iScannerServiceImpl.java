@@ -242,7 +242,7 @@ public class iScannerServiceImpl implements IScannerService {
             String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonResultMap);
             session.setJsonResult(jsonString);
             session.setOpenPorts(openPortCount);
-            session.setClosedPorts(closedPortCount);
+            session.setClosedPorts(scanEnd-openPortCount);
             session.setFilteredPorts(filteredPortCount);
             scanSessionRepository.save(session);
         } catch (Exception e) {
@@ -251,7 +251,7 @@ public class iScannerServiceImpl implements IScannerService {
 
         // Final log for debugging
         System.out.println("Open Ports: " + openPortCount);
-        System.out.println("Closed Ports: " + closedPortCount);
+        System.out.println("Closed Ports: " + (scanEnd-openPortCount));
         System.out.println("Filtered Ports: " + filteredPortCount);
         System.out.println("Total IPs scanned: " + allIPsSeen.size());
         System.out.println("UP IPs: " + upIPs.size());

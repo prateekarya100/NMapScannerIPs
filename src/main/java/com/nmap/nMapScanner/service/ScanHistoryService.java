@@ -52,12 +52,12 @@ public class ScanHistoryService {
             long downCount = scannedIPs.stream().filter(ip -> "DOWN".equalsIgnoreCase(ip.getStatus())).count();
 
             Map<String, Object> summary = new HashMap<>();
-            summary.put("openPorts", open);
-            summary.put("closedPorts", closed);
-            summary.put("filteredPorts", filtered);
-            summary.put("totalIPsScanned", scannedIPs.size());
-            summary.put("upIPs", upCount);
-            summary.put("downIPs", downCount);
+//            summary.put("openPorts", open);
+//            summary.put("closedPorts", closed);
+//            summary.put("filteredPorts", filtered);
+//            summary.put("totalIPsScanned", scannedIPs.size());
+//            summary.put("upIPs", upCount);
+//            summary.put("downIPs", downCount);
 
             result.put(sessionId, summary);
         }
