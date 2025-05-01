@@ -8,7 +8,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,7 +59,7 @@ public class ScanController {
             List<String> scanTypes = SCAN_PROFILES.keySet().stream().toList();
             model.addAttribute("scanTypes", scanTypes);
             model.addAttribute("error", "Profile name already exists. Please choose another.");
-                return "rangeIP"; // your form view name
+                return "rangeIP"; // view name
         }
 
         scannerService.scanAndSave(nMapScanData);

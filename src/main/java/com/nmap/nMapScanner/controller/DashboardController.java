@@ -25,12 +25,6 @@ public class DashboardController {
     private ScanHistoryService scanHistoryService;
 
     @Autowired
-    private IScannerService iScannerService;
-
-    @Autowired
-    private ScannedIPRepository scannedIPRepository;
-
-    @Autowired
     private ScanSessionRepository scanSessionRepository;
 
     @GetMapping("/profiles")
@@ -45,19 +39,20 @@ public class DashboardController {
 
     @GetMapping("/profile/{name}")
     public String viewProfileDetails(@PathVariable String name, Model model) {
-        // 1. Get scan sessions for the selected profile
+        // Get all scan sessions for the selected profile
         List<ScanSession> sessions = scanHistoryService.getScansForProfile(name);
-//        System.out.println(sessions);
 
+        // Get latest scan session id or last scan for the selected profile
         Long sessionId = sessions.get(sessions.size() - 1).getId();
 
-        // Fetch a ScanSession from your repository
+        // Fetch a last or latest scan from your ScanSession of profile
         ScanSession session = scanSessionRepository.findById(sessionId).orElseThrow(() -> new RuntimeException("Session not found"));
 
         // Get the count of IPs with scan data
         int ipsWithData = session.countIpsWithData();
         System.out.println("Number of IPs with scan data: " + ipsWithData);
 
+        // Get the count of IPs without scan data
         int ipsWithoutData = session.countIpsWithoutData();
         System.out.println("Number of IPs without scan data (DOWN IPs): " + ipsWithoutData);
 
@@ -65,7 +60,7 @@ public class DashboardController {
         Map<String, List<ScanSession>> groupedHistory = scanHistoryService.getScanHistoryGroupedByProfile();
         groupedHistory.values().forEach(Collections::reverse);
 
-        // 3. Create summaries for the current profile
+       // 3. Create summaries for the current profile
         List<ScanSessionSummary> summaries = sessions.stream()
                 .sorted(Comparator.comparing(ScanSession::getScanTime).reversed())
                 .map(s -> new ScanSessionSummary(
@@ -78,35 +73,11 @@ public class DashboardController {
                 ))
                 .toList();
 
-        // 4. Flatten all sessions to compute summary map
-        List<ScanSession> allSessions = groupedHistory.values()
-                .stream()
-                .flatMap(List::stream)
-                .toList();
-
-//        Map<Long, Map<String, Object>> summaryMap = scanHistoryService.getScanSummaries(allSessions);
-
-        // 5. Compute up/down IPs for the selected profile only
-        int upCount = 0;
-        int downCount = 0;
-
-        List<ScanSession> currentProfileSessions = groupedHistory.getOrDefault(name, List.of());
-
-//        for (ScanSession session : currentProfileSessions) {
-//            Map<String, Object> summary = summaryMap.get(session.getId());
-//            if (summary != null) {
-//                upCount += ((Number) summary.getOrDefault("upIPs", 0)).intValue();
-//                downCount += ((Number) summary.getOrDefault("downIPs", 0)).intValue();
-//            }
-//        }
-
-        // 6. Add all required data to model
+        // Add all required data to model
         model.addAttribute("profileName", name);
         model.addAttribute("scanSummaries", summaries);
         model.addAttribute("upCount", ipsWithData);
         model.addAttribute("downCount", ipsWithoutData);
-
-
 
         return "profile_details";
     }
