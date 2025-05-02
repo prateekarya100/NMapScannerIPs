@@ -1,8 +1,12 @@
 package com.nmap.nMapScanner.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nmap.nMapScanner.model.ScanSession;
 import com.nmap.nMapScanner.model.ScanSessionSummary;
 import com.nmap.nMapScanner.model.ScannedIP;
+import com.nmap.nMapScanner.model.ScannedIpDto;
 import com.nmap.nMapScanner.repository.ScanSessionRepository;
 import com.nmap.nMapScanner.repository.ScannedIPRepository;
 import com.nmap.nMapScanner.service.IScannerService;
@@ -41,26 +45,52 @@ public class DashboardController {
     public String viewProfileDetails(@PathVariable String name, Model model) {
         // Get all scan sessions for the selected profile
         List<ScanSession> sessions = scanHistoryService.getScansForProfile(name);
+        if (sessions.isEmpty()) {
+            throw new RuntimeException("No sessions found for profile: " + name);
+        }
 
-        // Get latest scan session id or last scan for the selected profile
-        Long sessionId = sessions.get(sessions.size() - 1).getId();
+        // Get latest scan session
+        ScanSession session = sessions.get(sessions.size() - 1);
 
-        // Fetch a last or latest scan from your ScanSession of profile
-        ScanSession session = scanSessionRepository.findById(sessionId).orElseThrow(() -> new RuntimeException("Session not found"));
+        // Get IP counts
+        int ipsWithData = scanSessionRepository.countIpsWithData(session.getId());
+        int ipsWithoutData = scanSessionRepository.countIpsWithoutData(session.getId());
 
-        // Get the count of IPs with scan data
-        int ipsWithData = session.countIpsWithData();
-        System.out.println("Number of IPs with scan data: " + ipsWithData);
+        // 4. Parse JSON and extract UP IPs with data using  Jackson
+        String json = session.getJsonResult();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = null;
 
-        // Get the count of IPs without scan data
-        int ipsWithoutData = session.countIpsWithoutData();
-        System.out.println("Number of IPs without scan data (DOWN IPs): " + ipsWithoutData);
+        try {
+            jsonNode = objectMapper.readTree(json);
+        } catch (Exception e) {
+            throw new RuntimeException("Error parsing JSON", e);
+        }
 
-        // 2. Get all grouped history
-        Map<String, List<ScanSession>> groupedHistory = scanHistoryService.getScanHistoryGroupedByProfile();
-        groupedHistory.values().forEach(Collections::reverse);
+        List<String> validIps = new ArrayList<>();
 
-       // 3. Create summaries for the current profile
+        // Iterate over the JSON keys and check for "host down" status
+        JsonNode finalJsonNode = jsonNode;
+        jsonNode.fieldNames().forEachRemaining(key -> {
+            if (!key.contains("host down")) {
+                JsonNode data = finalJsonNode.get(key);
+                if (data.isArray() && data.size() > 0) {
+                    validIps.add(key);
+                }
+            }
+        });
+
+        // Map IPs to DTOs with random vulnerability levels
+        List<ScannedIpDto> ipDtos = validIps.stream()
+                .map(ip -> new ScannedIpDto(
+                        ip,
+                        (int) (Math.random() * 5),
+                        (int) (Math.random() * 3),
+                        (int) (Math.random() * 2)
+                ))
+                .toList();
+
+        // Prepare scan summaries for this profile
         List<ScanSessionSummary> summaries = sessions.stream()
                 .sorted(Comparator.comparing(ScanSession::getScanTime).reversed())
                 .map(s -> new ScanSessionSummary(
@@ -73,13 +103,15 @@ public class DashboardController {
                 ))
                 .toList();
 
-        // Add all required data to model
+        // Add all data to model
         model.addAttribute("profileName", name);
         model.addAttribute("scanSummaries", summaries);
         model.addAttribute("upCount", ipsWithData);
         model.addAttribute("downCount", ipsWithoutData);
+        model.addAttribute("upIpAddress", ipDtos); // for progress bars
 
         return "profile_details";
     }
+
 
 }

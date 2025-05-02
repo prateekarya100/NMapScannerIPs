@@ -1,16 +1,16 @@
 package com.nmap.nMapScanner.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"scannedIP", "scanSession"})
 public class ScannedPort {
 
     @Id
@@ -25,10 +25,12 @@ public class ScannedPort {
 
     @ManyToOne
     @JoinColumn(name = "scanned_ip_id")
+    @JsonBackReference // Prevents infinite recursion
     private ScannedIP scannedIP;
 
     @ManyToOne
     @JoinColumn(name = "scan_session_id")
+    @JsonIgnore
     private ScanSession scanSession;
 
 }
