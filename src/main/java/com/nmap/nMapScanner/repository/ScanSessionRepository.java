@@ -21,8 +21,4 @@ public interface ScanSessionRepository extends JpaRepository<ScanSession,Long> {
     @Query("SELECT COUNT(ip) FROM ScannedIP ip LEFT JOIN ip.ports p WHERE ip.scanSession.id = :sessionId AND p.id IS NULL")
     int countIpsWithoutData(@Param("sessionId") Long sessionId);
 
-    @Query("SELECT DISTINCT ip FROM ScannedIP ip LEFT JOIN FETCH ip.ports WHERE ip.scanSession.id = :sessionId AND ip.status = 'UP'")
-    List<ScannedIP> findUpIpsWithPortData(@Param("sessionId") Long sessionId);
-
-
 }

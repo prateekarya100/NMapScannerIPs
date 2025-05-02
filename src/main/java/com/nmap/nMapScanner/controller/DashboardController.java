@@ -74,7 +74,7 @@ public class DashboardController {
         jsonNode.fieldNames().forEachRemaining(key -> {
             if (!key.contains("host down")) {
                 JsonNode data = finalJsonNode.get(key);
-                if (data.isArray() && data.size() > 0) {
+                if (data.isArray() && !data.isEmpty()) {
                     validIps.add(key);
                 }
             }
@@ -82,13 +82,19 @@ public class DashboardController {
 
         // Map IPs to DTOs with random vulnerability levels
         List<ScannedIpDto> ipDtos = validIps.stream()
-                .map(ip -> new ScannedIpDto(
-                        ip,
-                        (int) (Math.random() * 5),
-                        (int) (Math.random() * 3),
-                        (int) (Math.random() * 2)
-                ))
-                .toList();
+                .map(ip -> {
+                    ScannedIpDto dto = new ScannedIpDto();
+                    dto.setIpAddress(ip);
+
+                    // Initially assign random data
+                    dto.setLowVulners((int) (Math.random() * 5));
+                    dto.setMediumVulners((int) (Math.random() * 3));
+                    dto.setHighVulners((int) (Math.random() * 2));
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
 
         // Prepare scan summaries for this profile
         List<ScanSessionSummary> summaries = sessions.stream()
