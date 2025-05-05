@@ -96,13 +96,15 @@ public class DashboardController {
                         String service = portEntry.path("service").asText("");
                         String version = portEntry.path("version").asText("");
 
-                        // Filter out "unknown" or "no-response"
                         if (!"unknown".equalsIgnoreCase(service) &&
                                 !"unknown".equalsIgnoreCase(version) &&
                                 !"no-response".equalsIgnoreCase(version)) {
 
                             PortInfoDto portInfo = new PortInfoDto();
-                            portInfo.setPort(String.valueOf(portEntry.path("port").asInt()));
+                            String protocol = portEntry.has("protocol") ? portEntry.path("protocol").asText("tcp") : "tcp";
+                            String portWithProtocol = portEntry.path("port").asText() + "/" + protocol;
+
+                            portInfo.setPort(portWithProtocol);
                             portInfo.setService(service);
                             portInfo.setVersion(version);
 
@@ -122,31 +124,30 @@ public class DashboardController {
         validIps.forEach(ip -> {
             JsonNode ipDataArray = finalJsonNode.get(ip);
             if (ipDataArray != null && ipDataArray.isArray()) {
-                // Iterate through all ports for each IP
                 ipDataArray.forEach(portEntry -> {
-                    // Check if port, service, and version are present and valid
-                    if (portEntry.has("port") && portEntry.has("service") && portEntry.has("version") && portEntry.has("state")) {
+                    if (portEntry.has("port") && portEntry.has("service") &&
+                            portEntry.has("version") && portEntry.has("state")) {
+
                         String service = portEntry.path("service").asText();
                         String version = portEntry.path("version").asText();
+                        String portState = portEntry.path("state").asText();
 
-                        // Exclude unknown or null hosts, services, or versions
                         if (!"unknown".equalsIgnoreCase(service) && !service.isEmpty() &&
-                                !"unknown".equalsIgnoreCase(version) && !version.isEmpty()) {
+                                !"unknown".equalsIgnoreCase(version) && !version.isEmpty() &&
+                                ("open".equalsIgnoreCase(portState) || "filtered".equalsIgnoreCase(portState))) {
 
-                            String portState = portEntry.path("state").asText();
+                            PortInfoDto portDetails = new PortInfoDto();
+                            portDetails.setIpAddress(ip);
 
-                            // Check if the port is open and not null
-                            if ("open".equalsIgnoreCase(portState)) {
-                                // Create PortDetailsDto with IP, Port, Service, and Version
-                                PortInfoDto portDetails = new PortInfoDto();
-                                portDetails.setIpAddress(ip);
-                                portDetails.setPort(String.valueOf(portEntry.path("port").asInt()));
-                                portDetails.setService(service);
-                                portDetails.setVersion(version);
+                            String protocol = portEntry.has("protocol") ? portEntry.path("protocol").asText("tcp") : "tcp";
+                            String portWithProtocol = portEntry.path("port").asText() + "/" + protocol;
 
-                                // Add to the list
-                                portDetailsList.add(portDetails);
-                            }
+                            portDetails.setPort(portWithProtocol);
+                            portDetails.setService(service);
+                            portDetails.setVersion(version);
+                            portDetails.setState(portState);
+
+                            portDetailsList.add(portDetails);
                         }
                     }
                 });
@@ -172,11 +173,9 @@ public class DashboardController {
         model.addAttribute("upCount", ipsWithData);
         model.addAttribute("downCount", ipsWithoutData);
         model.addAttribute("upIpAddress", ipDtos);
-        // Send the list of IP | PORT | SERVICES | VERSION
         model.addAttribute("portDetailsList", portDetailsList);
 
         return "profile_details";
     }
-
 
 }

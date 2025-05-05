@@ -140,6 +140,12 @@ public class iScannerServiceImpl implements IScannerService {
                     String version = parts.length >= 5 ? parts[4] :
                             (parts.length >= 4 ? parts[3] : "unknown");
 
+                    version = version.replaceAll("(?i)ttl\\s*\\d+", "").trim();
+                    if (version.isBlank()) {
+                        version = "unknown";
+                    }
+
+
                     knownPorts.add(port);
                     if ("tcp".equalsIgnoreCase(protocol)) isTcpScan = true;
 

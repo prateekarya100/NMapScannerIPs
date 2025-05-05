@@ -12,4 +12,5 @@ public class PortInfoDto {
     private String port;
     private String service;
     private String version;
+    private String state;
 }

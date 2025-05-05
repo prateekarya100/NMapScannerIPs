@@ -448,6 +448,7 @@
                       <tr>
                         <th>IP</th>
                         <th>PORT</th>
+                        <th>STATE</th>
                         <th>SERVICE</th>
                         <th>VERSION</th>
                       </tr>
@@ -463,6 +464,9 @@
                             </td>
                             <td>
                               <span class="fw-medium" th:text="${portDetails.port}">22</span>
+                            </td>
+                            <td>
+                              <span class="fw-medium" th:text="${portDetails.state}">open</span>
                             </td>
                             <td>
                                 <span class="fw-medium" th:text="${portDetails.service}">ssh</span>
