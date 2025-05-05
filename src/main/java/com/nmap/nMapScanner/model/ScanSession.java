@@ -1,12 +1,8 @@
 package com.nmap.nMapScanner.model;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 
 @Data
 @Entity

@@ -1,15 +1,16 @@
 package com.nmap.nMapScanner.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
-@Data
+import java.util.List;
+
+@Getter
+@Setter
 @ToString @AllArgsConstructor @NoArgsConstructor
 public class ScannedIpDto {
     private String ipAddress;
     private int lowVulners;
     private int mediumVulners;
     private int highVulners;
+    private List<PortInfoDto> ports;
 }

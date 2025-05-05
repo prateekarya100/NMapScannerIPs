@@ -441,7 +441,29 @@
               <div class="tab-pane fade" id="vulnerabilities" role="tabpanel">
                 <div class="card p-4">
                   <h5 class="mb-3">Vulnerability Overview</h5>
-                  <p>Vulnerability details for the scanned targets will be shown here.</p>
+<!--                  <p>Vulnerability details for the scanned targets will be shown here.</p>-->
+                  <div class="table-responsive text-nowrap">
+                    <table class="table">
+                      <thead>
+                      <tr>
+                        <th>IP</th>
+                        <th>PORT</th>
+                        <th>SERVICE</th>
+                        <th>VERSION</th>
+                      </tr>
+                      </thead>
+                      <tbody class="table-border-bottom-0">
+                      <tbody class="table-border-bottom-0">
+                      <!-- Iterate over the portDetailsList -->
+                          <tr th:each="portDetails : ${portDetailsList}">
+                            <td th:text="${portDetails.ipAddress}">192.168.1.1</td>
+                            <td th:text="${portDetails.port}">22</td>
+                            <td th:text="${portDetails.service}">ssh</td>
+                            <td th:text="${portDetails.version}">OpenSSH</td>
+                          </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
 
