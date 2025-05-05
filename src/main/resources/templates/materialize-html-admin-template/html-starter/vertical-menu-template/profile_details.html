@@ -455,11 +455,21 @@
                       <tbody class="table-border-bottom-0">
                       <tbody class="table-border-bottom-0">
                       <!-- Iterate over the portDetailsList -->
+
                           <tr th:each="portDetails : ${portDetailsList}">
-                            <td th:text="${portDetails.ipAddress}">192.168.1.1</td>
-                            <td th:text="${portDetails.port}">22</td>
-                            <td th:text="${portDetails.service}">ssh</td>
-                            <td th:text="${portDetails.version}">OpenSSH</td>
+                            <td>
+                              <i class="ri-global-line ri-22px me-2" style="color: #87CEEB;"></i>
+                              <span class="fw-medium" th:text="${portDetails.ipAddress}">192.168.1.34</span>
+                            </td>
+                            <td>
+                              <span class="fw-medium" th:text="${portDetails.port}">22</span>
+                            </td>
+                            <td>
+                                <span class="fw-medium" th:text="${portDetails.service}">ssh</span>
+                            </td>
+                              <td>
+                                <span class="fw-medium" th:text="${portDetails.version}">OpenSSH</span>
+                              </td>
                           </tr>
                       </tbody>
                     </table>
