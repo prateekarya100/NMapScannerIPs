@@ -17,6 +17,7 @@ public class ScanSession {
     private String scanType;
 
     private LocalDateTime scanTime;
+    private LocalDateTime scanEndTime;
 
     @Lob
     private String jsonResult;

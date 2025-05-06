@@ -363,16 +363,16 @@
                         <strong>Scan Name:</strong> Advanced Network Vulnerability Scan
                       </li>
                       <li class="collection-item">
-                        <strong>CVSS Score:</strong> 6.3
+                        <strong>Scan Type:</strong>
+                        <span th:text="${scanType}">Advanced Scan</span>
                       </li>
                       <li class="collection-item">
-                        <strong>Scan Template:</strong> Advanced Scan
+                        <strong>Scan Start:</strong>
+                        <span th:text="${#temporals.format(scanStartTime, 'yyyy-MM-dd hh:mm a')}">2025-04-18 10:32 AM</span>
                       </li>
                       <li class="collection-item">
-                        <strong>Start Time:</strong> 2025-04-18 10:32 AM
-                      </li>
-                      <li class="collection-item">
-                        <strong>End Time:</strong> 2025-04-18 10:38 AM
+                        <strong>Scan End:</strong>
+                        <span th:text="${#temporals.format(scanEndTime, 'yyyy-MM-dd hh:mm a')}">2025-04-18 10:38 AM</span>
                       </li>
                     </ul>
                   </div>

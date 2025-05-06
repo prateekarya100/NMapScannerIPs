@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ScanSessionRepository extends JpaRepository<ScanSession,Long> {
@@ -19,5 +20,7 @@ public interface ScanSessionRepository extends JpaRepository<ScanSession,Long> {
 
     @Query("SELECT COUNT(ip) FROM ScannedIP ip LEFT JOIN ip.ports p WHERE ip.scanSession.id = :sessionId AND p.id IS NULL")
     int countIpsWithoutData(@Param("sessionId") Long sessionId);
+
+    List<ScanSession> findScanSessionsByProfile(String name);
 
 }

@@ -46,11 +46,6 @@ public class ScanController {
         return "rangeIP";
     }
 
-    @GetMapping(value = "/scanned")
-    public String scannedStatusHandler(Model model){
-        return "scanned";
-    }
-
     @PostMapping(value = "/form/submit")
     public String createScanProfile(@ModelAttribute("scanProfile") NMapScanData nMapScanData,
                                     Model model){

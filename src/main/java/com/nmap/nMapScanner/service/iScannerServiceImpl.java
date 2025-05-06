@@ -42,10 +42,10 @@ public class iScannerServiceImpl implements IScannerService {
         ScanSession session = new ScanSession();
         session.setTarget(nMapScanData.getTarget());
         session.setProfile(nMapScanData.getProfile());
-        session.setScanTime(LocalDateTime.now());
+        session.setScanTime(LocalDateTime.now()); //  Start time only
         session.setScanType(nMapScanData.getScanType());
         session.setScanData(nMapScanData);
-        scanSessionRepository.save(session);
+        scanSessionRepository.save(session); // Save without end time
 
         String command = buildNmapCommand(nMapScanData.getTarget(), nMapScanData.getProfile());
         System.out.println("Executing Nmap command: " + command);
@@ -70,12 +70,15 @@ public class iScannerServiceImpl implements IScannerService {
             }
 
             String output = outputBuilder.toString();
+
+            //This method sets scanEndTime and saves session again
             parseAndSaveOutput(output, session);
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
+
 
     private String buildNmapCommand(String target, String profile) {
         String args = switch (profile.toLowerCase()) {
@@ -227,6 +230,7 @@ public class iScannerServiceImpl implements IScannerService {
             session.setOpenPorts(openPortCount);
             session.setClosedPorts(scanEnd - openPortCount);
             session.setFilteredPorts(filteredPortCount);
+            session.setScanEndTime(LocalDateTime.now());
             scanSessionRepository.save(session);
         } catch (Exception e) {
             e.printStackTrace();
